@@ -1,0 +1,21 @@
+# ===== Ferramentas locais (não precisam ir pro git) =====
+.claude/
+
+# ===== Lixo de sistema operacional / OneDrive =====
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+*.tmp
+
+# ===== Node (caso use no futuro) =====
+node_modules/
+npm-debug.log*
+
+# ===== SEGREDOS — NUNCA versionar =====
+# A service_role key e o DEBITOPAY_WEBHOOK_SECRET ficam só nos
+# "Secrets" do Supabase. Estas regras evitam subir segredo por acidente.
+.env
+.env.*
+*.key
+*.pem

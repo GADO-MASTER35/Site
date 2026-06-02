@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pagamento · Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0b10;--card:#1d181f;--line:#2c252e;--ink:#f3eef2;--muted:#a99caa;
+    --accent:#e0567f;--ok:#5fd09a;--tg:#229ED9;
+    --display:'Fraunces',Georgia,serif;--body:'Manrope',system-ui,sans-serif;--radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(120% 120% at 50% 0%,#1c151c 0%,#0b080c 70%);color:var(--ink);
+    font-family:var(--body);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{max-width:460px;width:100%;text-align:center;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:40px 30px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .logo{font-family:var(--display);font-size:24px;font-weight:600;margin-bottom:22px}
+  .logo span{color:var(--accent)}
+  .spinner{width:46px;height:46px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--accent);
+    margin:6px auto 18px;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .icon{font-size:46px;line-height:1;margin-bottom:12px}
+  h1{font-family:var(--display);font-weight:600;font-size:26px;margin-bottom:8px;line-height:1.15}
+  p{color:var(--muted);font-size:15px;margin-bottom:8px}
+  .btn{font-family:var(--body);font-weight:700;font-size:16px;border:none;border-radius:12px;padding:15px 22px;
+    cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:18px}
+  .btn:active{transform:scale(.99)}
+  .btn-tg{background:linear-gradient(120deg,#34a6e0,#229ED9);color:#fff}
+  .btn-tg svg{width:20px;height:20px}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+  .btn-ghost:hover{color:var(--ink)}
+  .small{font-size:13px;color:var(--muted);margin-top:16px}
+  .hidden{display:none!important}
+  a.plain{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Studio<span>.</span></div>
+
+    <!-- 1) verificando -->
+    <div id="checking">
+      <div class="spinner"></div>
+      <h1>Confirmando seu pagamento…</h1>
+      <p>Isto leva alguns segundos. Não feche esta página.</p>
+    </div>
+
+    <!-- 2) confirmado -->
+    <div id="ok" class="hidden">
+      <div class="icon">✅</div>
+      <h1>Pagamento confirmado!</h1>
+      <p>Seu acesso ao grupo VIP está liberado. Toque no botão abaixo para entrar no Telegram.</p>
+      <a id="tgBtn" class="btn btn-tg" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+        Entrar no grupo VIP
+      </a>
+      <p class="small">Guarde este link. Ele é pessoal e foi liberado para o seu pagamento.</p>
+    </div>
+
+    <!-- 3) ainda nao confirmado -->
+    <div id="pending" class="hidden">
+      <div class="icon">⏳</div>
+      <h1>Ainda não confirmamos</h1>
+      <p>Se você acabou de pagar, pode levar mais um instante. Toque para verificar de novo.</p>
+      <button class="btn btn-tg" onclick="check(true)">Já paguei — verificar de novo</button>
+      <p class="small">Continua sem confirmar? Fale com o suporte e informe seu comprovativo.</p>
+    </div>
+
+    <!-- 4) erro de configuracao -->
+    <div id="cfg" class="hidden">
+      <div class="icon">⚙️</div>
+      <h1>Pagamentos ainda não conectados</h1>
+      <p>O Supabase precisa estar configurado para a verificação funcionar. Veja o guia <b>SETUP-PAGAMENTO.md</b>.</p>
+      <a class="btn btn-ghost" href="vitrine-agencia.html">Voltar ao site</a>
+    </div>
+  </div>
+
+<script src="supabase-config.js"></script>
+<script>
+  const $ = (id)=>document.getElementById(id);
+  function show(which){
+    ['checking','ok','pending','cfg'].forEach(id=>$(id).classList.toggle('hidden', id!==which));
+  }
+
+  // referencia do pagamento, lida da URL (vinda do DebitoPay e/ou da nossa redireção)
+  const q = new URLSearchParams(location.search);
+  const ref = q.get('reference') || q.get('ref') || q.get('transaction_id') || q.get('payment_id') || q.get('id') || '';
+
+  // sem Supabase configurado -> nao da pra verificar
+  if(typeof SUPABASE_URL === 'undefined' || !String(SUPABASE_URL).startsWith('http')){
+    show('cfg');
+  }
+
+  let tries = 0;
+  async function check(manual){
+    if(typeof SUPABASE_URL === 'undefined' || !String(SUPABASE_URL).startsWith('http')){ show('cfg'); return; }
+    if(!ref){ show('pending'); return; }
+    if(manual) show('checking');
+    try{
+      const url = `${SUPABASE_URL}/functions/v1/unlock?reference=${encodeURIComponent(ref)}`;
+      const r = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } });
+      const data = await r.json();
+      if(data.paid && data.telegram){
+        $('tgBtn').href = data.telegram;
+        show('ok');
+        return;
+      }
+      if(data.paid && !data.telegram){
+        // pago, mas plano sem telegram (ex: acesso). Manda de volta ao site.
+        $('#pending') && show('ok');
+        $('tgBtn').classList.add('hidden');
+        return;
+      }
+    }catch(e){ /* tenta de novo */ }
+
+    // ainda nao confirmado: tenta automaticamente algumas vezes
+    tries++;
+    if(tries < 6){ setTimeout(()=>check(false), 4000); show('checking'); }
+    else { show('pending'); }
+  }
+
+  if(typeof SUPABASE_URL !== 'undefined' && String(SUPABASE_URL).startsWith('http')){
+    check(false);
+  }
+</script>
+</body>
+</html>

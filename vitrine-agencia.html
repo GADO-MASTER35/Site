@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Studio · Conteúdo Exclusivo +18</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0b10;
+    --bg-soft:#171318;
+    --card:#1d181f;
+    --line:#2c252e;
+    --ink:#f3eef2;
+    --muted:#a99 caa;
+    --muted:#a99caa;
+    --accent:#e0567f;
+    --accent-2:#c9963f;
+    --ok:#5fd09a;
+    --display:'Fraunces',Georgia,serif;
+    --body:'Manrope',system-ui,sans-serif;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;overflow-x:hidden}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body.locked{overflow:hidden;height:100vh}
+
+  /* ---------- AGE GATE ---------- */
+  #ageGate{
+    position:fixed;inset:0;z-index:1000;
+    background:radial-gradient(120% 120% at 50% 0%, #1c151c 0%, #0b080c 70%);
+    display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .gate-card{
+    max-width:440px;width:100%;text-align:center;
+    background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:40px 32px;
+    box-shadow:0 30px 80px rgba(0,0,0,.5);
+  }
+  .gate-card .mark{font-size:13px;letter-spacing:.25em;color:var(--accent);font-weight:700;text-transform:uppercase}
+  .gate-card h1{font-family:var(--display);font-weight:600;font-size:30px;margin:14px 0 6px;line-height:1.1}
+  .gate-card p{color:var(--muted);font-size:14px;margin-bottom:8px}
+  .gate-card .fine{font-size:12px;margin:18px 0 24px}
+  .gate-btns{display:flex;flex-direction:column;gap:10px}
+  .btn{
+    font-family:var(--body);font-weight:700;font-size:15px;
+    border:none;border-radius:12px;padding:15px 22px;cursor:pointer;
+    transition:transform .15s ease, filter .2s ease;text-decoration:none;display:inline-block;text-align:center;
+  }
+  .btn:active{transform:scale(.98)}
+  .btn-primary{background:linear-gradient(120deg,var(--accent),#b8456a);color:#fff}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-tg{background:linear-gradient(120deg,#34a6e0,#229ED9);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:9px}
+  .btn-tg:hover{filter:brightness(1.08)}
+  .btn-tg svg{width:18px;height:18px;flex:none}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .btn-ghost:hover{color:var(--ink)}
+
+  /* ---------- SHELL ---------- */
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+  header.site{
+    position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+    background:rgba(14,11,16,.78);border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:66px}
+  .logo{font-family:var(--display);font-size:22px;font-weight:600;letter-spacing:-.01em;cursor:pointer}
+  .logo span{color:var(--accent)}
+  .nav-tag{font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;border:1px solid var(--line);padding:5px 11px;border-radius:99px}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:74px 0 52px;position:relative}
+  .hero::before{
+    content:"";position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+    width:680px;height:380px;border-radius:50%;filter:blur(110px);opacity:.4;
+    background:radial-gradient(circle,var(--accent),transparent 65%);z-index:-1;
+  }
+  .hero .kicker{font-size:12px;letter-spacing:.3em;color:var(--accent-2);font-weight:700;text-transform:uppercase}
+  .hero h2{font-family:var(--display);font-weight:600;font-size:clamp(34px,6vw,58px);line-height:1.04;margin:16px 0 18px;max-width:13ch}
+  .hero h2 em{font-style:italic;color:var(--accent)}
+  .hero p{color:var(--muted);font-size:17px;max-width:52ch}
+  .hero .trust{display:flex;gap:26px;margin-top:30px;flex-wrap:wrap}
+  .trust-item{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .trust-item b{color:var(--ink);font-weight:700}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(95,208,154,.15)}
+
+  /* ---------- SECTION ---------- */
+  .section{padding:30px 0 70px}
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:26px;gap:16px;flex-wrap:wrap}
+  .section-head h3{font-family:var(--display);font-weight:600;font-size:30px}
+  .section-head p{color:var(--muted);font-size:14px;max-width:40ch}
+
+  /* ---------- CREATOR GRID ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+  .creator{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;cursor:pointer;transition:transform .25s ease, border-color .25s ease;
+    display:flex;flex-direction:column;
+  }
+  .creator:hover{transform:translateY(-5px);border-color:var(--accent)}
+  .creator .thumb{
+    aspect-ratio:4/5;background:
+      linear-gradient(150deg,#2a2230,#191320);
+    position:relative;display:flex;align-items:center;justify-content:center;
+  }
+  .creator .thumb .ph{color:#5f5566;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+  .creator .live{
+    position:absolute;top:12px;left:12px;font-size:10px;font-weight:800;letter-spacing:.12em;
+    background:rgba(95,208,154,.16);color:var(--ok);padding:5px 9px;border-radius:99px;
+    display:flex;align-items:center;gap:6px;text-transform:uppercase;
+  }
+  .creator .live .dot{width:6px;height:6px}
+  .creator .info{padding:16px 16px 18px;display:flex;flex-direction:column;gap:7px;flex:1}
+  .creator .name{font-family:var(--display);font-weight:600;font-size:20px}
+  .creator .handle{color:var(--accent);font-size:13px;font-weight:600;margin-top:-4px}
+  .creator .bio{color:var(--muted);font-size:13px;flex:1}
+  .creator .meta{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:4px}
+  .creator .meta b{color:var(--ink)}
+  .creator .from{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:13px;border-top:1px solid var(--line)}
+  .creator .from .price{font-size:14px}
+  .creator .from .price b{font-family:var(--display);font-size:19px;color:var(--ink)}
+  .creator .from .arrow{color:var(--accent);font-weight:700;font-size:14px}
+
+  /* ---------- CREATOR DETAIL ---------- */
+  #detail{display:none}
+  .back{background:none;border:none;color:var(--muted);font-family:var(--body);font-size:14px;cursor:pointer;padding:24px 0 6px;display:flex;align-items:center;gap:8px}
+  .back:hover{color:var(--ink)}
+  .profile{display:grid;grid-template-columns:300px 1fr;gap:34px;padding:14px 0 40px;align-items:start}
+  .profile .avatar{aspect-ratio:1;border-radius:var(--radius);background:linear-gradient(150deg,#2a2230,#191320);display:flex;align-items:center;justify-content:center;color:#5f5566;font-size:11px;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--line)}
+  .profile h2{font-family:var(--display);font-weight:600;font-size:34px;margin-bottom:2px}
+  .profile .handle{color:var(--accent);font-weight:600;margin-bottom:16px}
+  .profile .desc{color:var(--muted);max-width:54ch;margin-bottom:20px}
+  .stats{display:flex;gap:30px;margin-bottom:8px}
+  .stat b{font-family:var(--display);font-size:24px;display:block}
+  .stat span{font-size:12px;color:var(--muted);letter-spacing:.05em}
+
+  .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:14px}
+  .plan{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px;display:flex;flex-direction:column;gap:12px;position:relative}
+  .plan.best{border-color:var(--accent)}
+  .plan .badge{position:absolute;top:-11px;left:22px;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:var(--accent);color:#fff;padding:5px 11px;border-radius:99px}
+  .plan .tier{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .plan h4{font-family:var(--display);font-weight:600;font-size:22px}
+  .plan .price{font-family:var(--display);font-size:30px}
+  .plan .price small{font-size:14px;color:var(--muted);font-family:var(--body)}
+  .plan ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted);flex:1}
+  .plan li{display:flex;gap:9px;align-items:flex-start}
+  .plan li::before{content:"✓";color:var(--ok);font-weight:800}
+
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px}
+
+  /* barra fixa de ação no perfil (só mobile) */
+  #stickyCta{
+    display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:rgba(14,11,16,.92);backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);
+  }
+  #stickyCta .btn{width:100%}
+  body.detail-open #stickyCta{display:block}
+  @media(min-width:761px){ body.detail-open #stickyCta{display:none} }
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  footer a{color:var(--muted);text-decoration:none}
+  footer a:hover{color:var(--ink)}
+
+  /* ===================== AMBIENTE / PALCO ===================== */
+  /* camada de luzes/fumaca/dancarina, sempre atras do conteudo */
+  .ambient{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#0a0709}
+  /* conteudo acima do ambiente */
+  main,footer{position:relative;z-index:1}
+  /* legibilidade do texto sobre o video de fundo */
+  .hero h2,.hero p,.hero .kicker,.section-head h3,.section-head p,.trust-item{text-shadow:0 2px 16px rgba(0,0,0,.55)}
+
+  /* 1) silhueta da mulher dancando (licenca livre Pexels) */
+  /* contraste alto = figura bem marcada (silhueta) sobre o fundo iluminado */
+  .dancer-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.96;filter:contrast(1.16) saturate(1.06) brightness(1.06)}
+  /* 2) fumaca em video, soma luz por cima (so desktop, e pesado) */
+  .smoke-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:screen;opacity:.5}
+  /* 3) nevoa em CSS — base leve de fumaca (vale ate sem o video) */
+  .fog{position:absolute;inset:-12%;mix-blend-mode:screen;opacity:.55;filter:blur(34px);
+    background:
+      radial-gradient(40% 30% at 20% 72%,rgba(150,120,130,.22),transparent 60%),
+      radial-gradient(46% 34% at 76% 64%,rgba(170,130,140,.18),transparent 60%),
+      radial-gradient(52% 42% at 50% 88%,rgba(130,100,110,.18),transparent 60%);
+    animation:fog 26s ease-in-out infinite;will-change:transform}
+  @keyframes fog{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(4%,-3%) scale(1.08)}}
+
+  /* 4) escurecimento pro texto ficar legivel (mais leve no meio, p/ mostrar a silhueta) */
+  .stage-tint{position:absolute;inset:0;background:
+    linear-gradient(180deg,rgba(10,7,9,.72) 0%,rgba(10,7,9,.24) 32%,rgba(10,7,9,.30) 64%,rgba(10,7,9,.90) 100%),
+    radial-gradient(120% 80% at 50% 36%,transparent 46%,rgba(10,7,9,.52) 100%)}
+
+  /* 5) banho de luz vermelha ambiente */
+  .red-wash{position:absolute;inset:0;mix-blend-mode:screen;background:
+    radial-gradient(92% 70% at 50% 26%,rgba(224,42,58,.30),transparent 62%),
+    radial-gradient(80% 60% at 50% 102%,rgba(150,16,30,.36),transparent 60%)}
+
+  /* 6) orbs de luz (vermelhos) */
+  .orb{position:absolute;border-radius:50%;filter:blur(85px);mix-blend-mode:screen;will-change:transform,opacity}
+  .orb.a{width:440px;height:440px;background:radial-gradient(circle,#e02a3a,transparent 66%);top:-90px;left:-60px;animation:drift1 17s ease-in-out infinite}
+  .orb.b{width:360px;height:360px;background:radial-gradient(circle,#8a0f1e,transparent 66%);bottom:-90px;right:-50px;animation:drift2 21s ease-in-out infinite}
+  .orb.c{width:320px;height:320px;background:radial-gradient(circle,#ff5236,transparent 66%);top:40%;left:54%;animation:drift3 25s ease-in-out infinite}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1);opacity:.40}50%{transform:translate(50px,40px) scale(1.18);opacity:.60}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1.05);opacity:.34}50%{transform:translate(-40px,-30px) scale(.9);opacity:.55}}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(.95);opacity:.24}50%{transform:translate(-60px,20px) scale(1.2);opacity:.48}}
+
+  /* 7) feixes de holofote vermelhos, varrendo de cima */
+  .beam{position:absolute;top:-12%;left:50%;width:170px;height:120%;transform-origin:top center;filter:blur(12px);opacity:.55;will-change:transform}
+  .beam.l{background:linear-gradient(to bottom,rgba(224,42,58,.30),transparent 70%);animation:sweepL 8s ease-in-out infinite}
+  .beam.r{background:linear-gradient(to bottom,rgba(255,82,54,.24),transparent 70%);animation:sweepR 11s ease-in-out infinite}
+  @keyframes sweepL{0%,100%{transform:translateX(-50%) rotate(-24deg)}50%{transform:translateX(-50%) rotate(-6deg)}}
+  @keyframes sweepR{0%,100%{transform:translateX(-50%) rotate(24deg)}50%{transform:translateX(-50%) rotate(6deg)}}
+
+  @media(max-width:760px){
+    .smoke-video{display:none}     /* economiza dados moveis: fica so a nevoa CSS */
+    .dancer-video{opacity:.85}
+    .orb.a{width:300px;height:300px}
+    .orb.b{width:260px;height:260px}
+    .orb.c{width:220px;height:220px}
+  }
+
+  /* ---------- MOBILE ---------- */
+  @media(max-width:760px){
+    .wrap{padding:0 16px}
+    .nav{height:58px}
+    .logo{font-size:20px}
+    .nav-tag{font-size:10px;padding:4px 9px}
+
+    .hero{padding:46px 0 34px}
+    .hero::before{width:380px;height:260px;top:-50px;filter:blur(80px)}
+    .hero h2{font-size:clamp(28px,9vw,40px);margin:12px 0 14px}
+    .hero p{font-size:15px}
+    .hero .trust{gap:12px;margin-top:22px;flex-direction:column}
+    .trust-item{font-size:13px}
+
+    .section{padding:18px 0 48px}
+    .section-head{margin-bottom:18px}
+    .section-head h3{font-size:24px}
+    .section-head p{font-size:13px}
+
+    /* dois cards por linha no celular, mais compactos */
+    .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+    .creator .info{padding:12px 12px 14px;gap:5px}
+    .creator .name{font-size:16px}
+    .creator .handle{font-size:12px}
+    .creator .bio{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .creator .meta{font-size:11px;gap:10px}
+    .creator .from .price{font-size:12px}
+    .creator .from .price b{font-size:16px}
+    .creator .from .arrow{font-size:12px}
+    .creator:hover{transform:none}
+
+    .back{padding:20px 0 4px}
+    .profile{grid-template-columns:1fr;gap:20px}
+    .profile .avatar{max-width:180px}
+    .profile h2{font-size:27px}
+    .stats{gap:22px}
+    .stat b{font-size:20px}
+    .profile .desc{font-size:14px}
+
+    .plans{grid-template-columns:1fr;gap:22px}
+    .plan{padding:22px 20px}
+
+    .btn{padding:16px 22px;font-size:16px}  /* alvos de toque maiores */
+
+    footer .wrap{flex-direction:column;gap:10px}
+  }
+
+  /* so telas MUITO estreitas (ex: dobravel/320px) caem p/ um card por linha */
+  @media(max-width:330px){
+    .grid{grid-template-columns:1fr}
+  }
+
+  /* respeita quem prefere menos animação */
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  }
+</style>
+</head>
+<body class="locked">
+
+  <!-- ================= AMBIENTE: SILHUETA + FUMAÇA + LUZES VERMELHAS ================= -->
+  <div class="ambient" aria-hidden="true">
+    <!-- silhueta de mulher dançando, em loop (licença livre Pexels) -->
+    <video class="dancer-video" autoplay muted loop playsinline preload="auto">
+      <source src="media/bg-dance.mp4" type="video/mp4">
+    </video>
+    <!-- fumaça por cima (screen) — só desktop -->
+    <video class="smoke-video" autoplay muted loop playsinline preload="auto">
+      <source src="media/smoke.mp4" type="video/mp4">
+    </video>
+    <div class="fog"></div>
+    <div class="stage-tint"></div>
+    <div class="red-wash"></div>
+    <div class="beam l"></div>
+    <div class="beam r"></div>
+    <div class="orb a"></div>
+    <div class="orb b"></div>
+    <div class="orb c"></div>
+  </div>
+
+  <!-- velocidade dos vídeos de fundo (1 = normal, 0.5 = metade) -->
+  <script>
+  (function(){
+    function speed(sel,rate){
+      var v=document.querySelector(sel); if(!v) return;
+      var apply=function(){ try{ v.playbackRate=rate; }catch(e){} };
+      apply();
+      v.addEventListener('loadedmetadata',apply);
+      v.addEventListener('play',apply);
+    }
+    speed('.dancer-video',0.5);   // dançarina mais devagar
+    speed('.smoke-video',0.6);    // fumaça mais devagar
+  })();
+  </script>
+
+  <!-- ================= PORTÃO DE IDADE (real, bloqueia o conteúdo) ================= -->
+  <div id="ageGate">
+    <div class="gate-card">
+      <div class="mark">Acesso restrito</div>
+      <h1>Conteúdo adulto +18</h1>
+      <p>Este site contém material explícito destinado exclusivamente a maiores de 18 anos.</p>
+      <p class="fine">Ao entrar, você confirma que tem 18 anos ou mais e que é legalmente permitido acessar este tipo de conteúdo na sua localidade.</p>
+      <div class="gate-btns">
+        <button class="btn btn-primary" onclick="enterSite()">Tenho 18 anos ou mais — entrar</button>
+        <a class="btn btn-ghost" href="https://www.google.com">Sair</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CABEÇALHO ================= -->
+  <header class="site">
+    <div class="wrap nav">
+      <div class="logo" onclick="logoTap()" title="Studio">Studio<span>.</span></div>
+      <div class="nav-tag">Conteúdo verificado · +18</div>
+    </div>
+  </header>
+
+  <!-- ================= HOME / VITRINE ================= -->
+  <main id="home">
+    <section class="hero">
+      <div class="wrap">
+        <div class="kicker">Brasileiras em Moçambique</div>
+        <h2>Conteúdo <em>exclusivo</em>, direto de quem cria.</h2>
+        <p>Uma seleção de criadoras brasileiras com conteúdo autoral, publicado por elas mesmas. Assine quem você gosta e apoie diretamente o trabalho delas.</p>
+        <div class="trust">
+          <div class="trust-item"><span class="dot"></span> <b>Conteúdo</b>&nbsp;100% autoral e consentido</div>
+          <div class="trust-item"><span class="dot"></span> <b>Pagamento</b>&nbsp;seguro e discreto</div>
+          <div class="trust-item"><span class="dot"></span> <b>Idade</b>&nbsp;de todas verificada</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h3>Nossas criadoras</h3>
+          </div>
+          <p>Toque em uma criadora para ver perfil, prévias e planos de assinatura.</p>
+        </div>
+        <div class="grid" id="creatorGrid"><!-- cards inseridos via JS --></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= DETALHE DA CRIADORA ================= -->
+  <main id="detail">
+    <div class="wrap">
+      <button class="back" onclick="showHome()">← Voltar à vitrine</button>
+      <div class="profile">
+        <div class="avatar" id="d-avatar">[ FOTO DE PERFIL ]</div>
+        <div>
+          <h2 id="d-name"></h2>
+          <div class="handle" id="d-handle"></div>
+          <div class="stats">
+            <div class="stat"><b id="d-photos"></b><span>FOTOS</span></div>
+            <div class="stat"><b id="d-videos"></b><span>VÍDEOS</span></div>
+            <div class="stat"><b id="d-subs"></b><span>ASSINANTES</span></div>
+          </div>
+          <p class="desc" id="d-desc"></p>
+        </div>
+      </div>
+
+      <div id="d-schedule-wrap" style="display:none">
+        <div class="section-head"><h3>Próximas lives</h3></div>
+        <div id="d-schedule" style="display:flex;flex-direction:column;gap:10px;margin-bottom:30px"></div>
+      </div>
+
+      <div class="section-head"><h3>Planos de assinatura</h3></div>
+      <div class="plans" id="d-plans"></div>
+      <div style="height:50px"></div>
+    </div>
+  </main>
+
+  <!-- ================= CTA FIXO (mobile, dentro do perfil) ================= -->
+  <div id="stickyCta">
+    <a class="btn btn-primary" id="stickyCtaLink" href="#" target="_blank" rel="noopener">Assinar</a>
+  </div>
+
+  <!-- ================= RODAPÉ ================= -->
+  <footer>
+    <div class="wrap">
+      <div>© 2026 Studio · Conteúdo +18 · Todas as criadoras têm idade verificada.</div>
+      <div>
+        <a href="#">Termos</a> &nbsp;·&nbsp;
+        <a href="#">Privacidade</a> &nbsp;·&nbsp;
+        <a href="#">Denúncias / Remoção (DMCA)</a>
+      </div>
+    </div>
+  </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+/* =====================================================================
+   CONEXAO COM O BANCO (Supabase)
+   As credenciais ficam em supabase-config.js (preenchidas uma vez so).
+   A vitrine so consegue ler perfis com approved = true (regra do banco).
+   ===================================================================== */
+
+/* =====================================================================
+   DADOS DE EXEMPLO (fallback) — usados só enquanto o Supabase não está
+   configurado. Com o banco ligado, os perfis vêm do painel da criadora.
+   ===================================================================== */
+let CREATORS = [
+  {
+    id: "biby",
+    name: "Biby",
+    handle: "@biby",                 // <-- troque se o @ for outro
+    photos: "—", videos: "—", subs: "—",   // <-- coloque os números reais quando tiver
+    live: true,
+    avatar: "",                      // <-- cole a URL da foto de capa/perfil dela
+    bio: "Conteúdo autoral exclusivo, publicado por mim. Novidades toda semana.",
+    desc: "Conteúdo exclusivo e autoral. Assine para ter acesso à galeria completa e ao grupo VIP no Telegram, com novidades em primeira mão.",
+    fromPrice: "297 MZN",
+    plans: [
+      { tier:"ACESSO", name:"Acesso completo", price:"297 MZN", per:"",
+        perks:["Acesso à galeria completa","Conteúdo novo toda semana","Mensagens diretas"],
+        checkoutUrl:"https://debitopay.com/l/ativacao-standard-biby-f4y5" },
+      { tier:"VIP", name:"Grupo VIP no Telegram", price:"497 MZN", per:"", best:true, telegram:true,
+        perks:["Tudo do acesso completo","Entrada no grupo VIP do Telegram","Conteúdo em primeira mão","Pedidos personalizados"],
+        checkoutUrl:"https://debitopay.com/l/pacote-vp-comunidade-w4iq" },
+    ]
+  },
+  // ---- duplique este bloco para cada nova criadora ----
+  // {
+  //   id: "outra", name: "Nome", handle: "@usuario",
+  //   photos:"—", videos:"—", subs:"—", live:false, avatar:"",
+  //   bio:"...", desc:"...", fromPrice:"297 MZN",
+  //   plans:[
+  //     { tier:"ACESSO", name:"Acesso completo", price:"297 MZN", per:"",
+  //       perks:["..."], checkoutUrl:"https://debitopay.com/l/..." },
+  //     { tier:"VIP", name:"Grupo VIP no Telegram", price:"497 MZN", per:"", best:true, telegram:true,
+  //       perks:["..."], checkoutUrl:"https://debitopay.com/l/..." },
+  //   ]
+  // },
+];
+
+/* ---------- Portão de idade ---------- */
+function enterSite(){
+  document.getElementById('ageGate').style.display='none';
+  document.body.classList.remove('locked');
+  // marca a sessão para não pedir de novo nesta visita
+  try { sessionStorage.setItem('age_ok','1'); } catch(e){}
+}
+try { if(sessionStorage.getItem('age_ok')==='1'){ enterSite(); } } catch(e){}
+
+/* ---------- Render da vitrine ---------- */
+function renderGrid(){
+  const grid = document.getElementById('creatorGrid');
+  if(!CREATORS.length){
+    grid.innerHTML = '<p style="color:var(--muted);font-size:14px">Nenhuma criadora publicada ainda.</p>';
+    return;
+  }
+  grid.innerHTML = CREATORS.map(c => `
+    <div class="creator" onclick="openCreator('${c.id}')">
+      <div class="thumb" ${c.avatar?`style="background-image:url('${c.avatar}');background-size:cover;background-position:center"`:''}>
+        ${c.live ? '<div class="live"><span class="dot"></span>Online agora</div>' : ''}
+        ${c.avatar ? '' : '<span class="ph">[ PRÉVIA / CAPA ]</span>'}
+      </div>
+      <div class="info">
+        <div class="name">${c.name}</div>
+        <div class="handle">${c.handle}</div>
+        <div class="bio">${c.bio}</div>
+        <div class="meta"><span><b>${c.photos}</b> fotos</span><span><b>${c.videos}</b> vídeos</span></div>
+        <div class="from">
+          <div class="price">a partir de <b>${c.fromPrice}</b></div>
+          <div class="arrow">Ver perfil →</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ---------- Carrega perfis aprovados do banco ---------- */
+function mapRow(row){
+  const plans = [];
+  if(row.access_price || row.checkout_access){
+    plans.push({ tier:"ACESSO", name:"Acesso completo", price:row.access_price||'', per:"",
+      perks:["Acesso à galeria completa","Conteúdo novo toda semana","Mensagens diretas"],
+      checkoutUrl: row.checkout_access || '#' });
+  }
+  if(row.vip_price || row.checkout_vip || row.telegram_link){
+    plans.push({ tier:"VIP", name:"Grupo VIP no Telegram", price:row.vip_price||'', per:"", best:true, telegram:true,
+      perks:["Tudo do acesso completo","Entrada no grupo VIP do Telegram","Conteúdo em primeira mão"],
+      checkoutUrl: row.checkout_vip || '#' });
+  }
+  return {
+    id: row.id,
+    name: row.name || 'Criadora',
+    handle: row.handle || '',
+    photos: row.photos_count || '—',
+    videos: row.videos_count || '—',
+    subs: '—',
+    live: !!row.is_live,
+    avatar: row.avatar_url || '',
+    gallery: row.gallery || [],
+    schedule: row.schedule || [],
+    bio: row.bio || '',
+    desc: row.description || '',
+    fromPrice: row.access_price || row.vip_price || '—',
+    plans
+  };
+}
+async function loadCreators(){
+  if(!sb) { renderGrid(); return; }   // sem banco: usa exemplos
+  const { data, error } = await sb
+    .from('creators_public').select('*')   // view publica: NAO expoe o telegram_link
+    .order('sort_order', {ascending:true})
+    .order('updated_at', {ascending:false});
+  if(error){ console.error(error); renderGrid(); return; }
+  if(data && data.length){ CREATORS = data.map(mapRow); }
+  renderGrid();
+}
+
+/* ---------- Checkout VIP: gera referência e redireciona ----------
+   O link do Telegram NÃO fica no site. O cliente paga, o DebitoPay
+   redireciona de volta para obrigado.html, que só então libera o
+   Telegram após confirmar o pagamento (webhook). */
+let currentCreatorId = null;
+function goVip(url){
+  if(!url || url === '#'){ return; }
+  const ref = `${currentCreatorId||'x'}__vip__${Date.now().toString(36)}${Math.random().toString(36).slice(2,7)}`;
+  try{ localStorage.setItem('studio_lastRef', ref); }catch(e){}
+  let target = url;
+  try{ const u = new URL(url); u.searchParams.set('reference', ref); target = u.toString(); }
+  catch(e){ target = url + (url.includes('?')?'&':'?') + 'reference=' + encodeURIComponent(ref); }
+  location.href = target;   // mesma aba: o gateway traz o cliente de volta
+}
+
+/* ---------- Abrir detalhe ---------- */
+function openCreator(id){
+  const c = CREATORS.find(x => String(x.id) === String(id));
+  if(!c) return;
+  currentCreatorId = c.id;
+  document.getElementById('d-name').textContent   = c.name;
+  document.getElementById('d-handle').textContent = c.handle;
+  document.getElementById('d-photos').textContent = c.photos;
+  document.getElementById('d-videos').textContent = c.videos;
+  document.getElementById('d-subs').textContent   = c.subs;
+  document.getElementById('d-desc').textContent   = c.desc;
+
+  // foto de perfil
+  const av = document.getElementById('d-avatar');
+  if(c.avatar){ av.style.backgroundImage=`url('${c.avatar}')`; av.style.backgroundSize='cover'; av.style.backgroundPosition='center'; av.textContent=''; }
+  else { av.style.backgroundImage=''; av.textContent='[ FOTO DE PERFIL ]'; }
+
+  // agenda de lives
+  const sw=document.getElementById('d-schedule-wrap');
+  const sl=document.getElementById('d-schedule');
+  const items=(c.schedule||[]).filter(s=>s.date||s.time);
+  if(items.length){
+    sw.style.display='block';
+    sl.innerHTML=items.map(s=>{
+      const d=s.date?new Date(s.date+'T00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long'}):'';
+      return `<div style="display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px">
+        <span style="color:var(--accent);font-weight:700">${d}${s.time?' · '+s.time:''}</span>
+        <span style="color:var(--muted);font-size:14px">${s.note||'Live'}</span>
+      </div>`;
+    }).join('');
+  } else { sw.style.display='none'; }
+
+  document.getElementById('d-plans').innerHTML = c.plans.map(p => `
+    <div class="plan ${p.best?'best':''}">
+      ${p.best?'<div class="badge">Mais escolhido</div>':''}
+      <div class="tier">${p.tier}</div>
+      <h4>${p.name}</h4>
+      <div class="price">${p.price}<small>${p.per||''}</small></div>
+      <ul>${p.perks.map(k=>`<li>${k}</li>`).join('')}</ul>
+      ${p.telegram
+        ? `<a class="btn btn-tg" href="${p.checkoutUrl}" onclick="event.preventDefault();goVip('${p.checkoutUrl}')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>Pagar e entrar no VIP</a>`
+        : `<a class="btn btn-primary" href="${p.checkoutUrl}" target="_blank" rel="noopener">Assinar</a>`}
+    </div>
+  `).join('');
+
+  // CTA fixo mobile: aponta para o plano em destaque (ou o primeiro)
+  const main = c.plans.find(p=>p.best) || c.plans[0];
+  const sticky = document.getElementById('stickyCtaLink');
+  if(main && sticky){
+    sticky.href = main.checkoutUrl;
+    if(main.telegram){
+      sticky.removeAttribute('target');
+      sticky.textContent = 'Pagar e entrar no VIP';
+      sticky.onclick = (e)=>{ e.preventDefault(); goVip(main.checkoutUrl); };
+    } else {
+      sticky.setAttribute('target','_blank');
+      sticky.textContent = 'Assinar';
+      sticky.onclick = null;
+    }
+  }
+
+  document.getElementById('home').style.display='none';
+  document.getElementById('detail').style.display='block';
+  document.body.classList.add('detail-open');
+  window.scrollTo(0,0);
+}
+
+function showHome(){
+  document.getElementById('detail').style.display='none';
+  document.getElementById('home').style.display='block';
+  document.body.classList.remove('detail-open');
+  window.scrollTo(0,0);
+}
+
+/* ---------- Acesso secreto ao painel admin ----------
+   Clique normal no logo = volta ao início.
+   5 cliques rápidos no logo  → abre o painel (painel-criadora.html).
+   Atalho de teclado (reserva, desktop): Ctrl + Shift + A.
+   O acesso de verdade é barrado no login (só o e-mail admin entra). */
+const ADMIN_PAGE = 'painel-criadora.html';
+let _taps = 0, _tapTimer = null;
+function logoTap(){
+  showHome();                       // mantém o comportamento normal do logo
+  _taps++;
+  clearTimeout(_tapTimer);
+  _tapTimer = setTimeout(()=>{ _taps = 0; }, 1200);
+  if(_taps >= 5){ _taps = 0; location.href = ADMIN_PAGE; }
+}
+document.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey||e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')){
+    e.preventDefault();
+    location.href = ADMIN_PAGE;
+  }
+});
+
+loadCreators();
+</script>
+</body>
+</html>

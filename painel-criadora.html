@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painel do Admin · Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0b10;--card:#1d181f;--line:#2c252e;--ink:#f3eef2;--muted:#a99caa;
+    --accent:#e0567f;--ok:#5fd09a;--tg:#229ED9;--warn:#e0a23f;
+    --display:'Fraunces',Georgia,serif;--body:'Manrope',system-ui,sans-serif;--radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:820px;margin:0 auto;padding:24px 18px 90px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 26px;border-bottom:1px solid var(--line);margin-bottom:26px}
+  .logo{font-family:var(--display);font-size:22px;font-weight:600}
+  .logo span{color:var(--accent)}
+  .who{font-size:13px;color:var(--muted)}
+  .who b{color:var(--ink)}
+  .link{background:none;border:none;color:var(--muted);font-family:var(--body);font-size:13px;cursor:pointer;text-decoration:underline}
+  h1{font-family:var(--display);font-weight:600;font-size:30px;margin-bottom:6px}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:24px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+  .card h2{font-family:var(--display);font-weight:600;font-size:19px;margin-bottom:4px}
+  .card .hint{color:var(--muted);font-size:13px;margin-bottom:16px}
+
+  label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+  input[type=text],input[type=email],input[type=password],input[type=url],input[type=date],input[type=time],input[type=number],textarea,select{
+    width:100%;background:#15111780;border:1px solid var(--line);color:var(--ink);
+    border-radius:10px;padding:12px 13px;font-family:var(--body);font-size:15px;
+  }
+  input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  textarea{resize:vertical;min-height:80px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
+
+  .btn{font-family:var(--body);font-weight:700;font-size:15px;border:none;border-radius:11px;padding:14px 20px;cursor:pointer;transition:filter .2s,transform .12s}
+  .btn:active{transform:scale(.99)}
+  .btn-primary{background:linear-gradient(120deg,var(--accent),#b8456a);color:#fff;width:100%}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+  .btn-ghost:hover{color:var(--ink)}
+  .btn-sm{padding:9px 13px;font-size:13px;border-radius:9px}
+  .btn-danger{background:transparent;border:1px solid #5e2733;color:#e0768a}
+  .btn-danger:hover{background:#5e273322}
+  .link-actions{display:flex;gap:8px;margin-top:7px}
+
+  .thumbs{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .thumb{width:80px;height:100px;border-radius:10px;object-fit:cover;border:1px solid var(--line);position:relative}
+  .thumb-wrap{position:relative}
+  .thumb-x{position:absolute;top:-7px;right:-7px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-weight:700;font-size:13px;line-height:1;z-index:2}
+  .thumb-move{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;padding:3px}
+  .thumb-move button{background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:6px;width:24px;height:22px;cursor:pointer;font-size:15px;line-height:1}
+  .thumb-move button:disabled{opacity:.3;cursor:default}
+  .thumb-badge{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;font-weight:800;letter-spacing:.05em;padding:2px 5px;border-radius:5px}
+  video.thumb{background:#000}
+  .thumb-wrap{cursor:grab}
+  .thumb-wrap.dragging{opacity:.35}
+  .thumb-wrap.over{outline:2px dashed var(--accent);outline-offset:2px;border-radius:10px}
+  .up{margin:14px 0 2px}
+  .up-bar{height:9px;background:#2c252e;border-radius:99px;overflow:hidden}
+  .up-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#b8456a);transition:width .12s}
+  .up-txt{font-size:12px;color:var(--muted);margin-top:6px}
+  .avatar-prev{width:96px;height:96px;border-radius:14px;object-fit:cover;border:1px solid var(--line)}
+
+  .sched-item{display:grid;grid-template-columns:1fr 1fr 1.4fr auto;gap:10px;align-items:end;margin-bottom:10px}
+  @media(max-width:560px){.sched-item{grid-template-columns:1fr 1fr}}
+  .sched-x{background:#2c252e;border:none;color:var(--muted);border-radius:9px;height:44px;cursor:pointer;font-size:18px}
+
+  .check{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);margin:12px 0}
+  .check input{margin-top:3px;width:16px;height:16px;flex:none}
+  .check b{color:var(--ink)}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ok);color:#06281b;font-weight:700;padding:13px 22px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:99}
+  .toast.show{opacity:1}
+  .toast.err{background:var(--accent);color:#fff}
+
+  .switch{display:flex;align-items:center;gap:10px;font-size:14px}
+  #auth{max-width:400px;margin:8vh auto 0}
+  .muted-small{font-size:12px;color:var(--muted);margin-top:14px;text-align:center}
+  .setup{background:#2a1f12;border:1px solid var(--warn);border-radius:12px;padding:14px 16px;font-size:13px;color:#e8d3a8;margin-bottom:18px;line-height:1.5}
+  .setup code{color:#fff;font-family:ui-monospace,monospace}
+
+  /* ----- lista de criadoras ----- */
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .toolbar .count{color:var(--muted);font-size:13px}
+  .list{display:flex;flex-direction:column;gap:12px}
+  .item{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .item .av{width:54px;height:54px;border-radius:11px;object-fit:cover;border:1px solid var(--line);background:#241d28 center/cover no-repeat;flex:none}
+  .item .meta{flex:1;min-width:0}
+  .item .meta .nm{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .item .meta .hd{color:var(--accent);font-size:12px}
+  .pill{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px}
+  .pill.on{background:rgba(95,208,154,.16);color:var(--ok)}
+  .pill.off{background:#332a36;color:var(--muted)}
+  .item .acts{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+  @media(max-width:560px){
+    .item{flex-wrap:wrap}
+    .item .acts{width:100%;justify-content:flex-start}
+  }
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 0}
+
+  .editor-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+  .back{background:none;border:none;color:var(--muted);font-family:var(--body);font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .back:hover{color:var(--ink)}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ===================== TELA DE LOGIN ===================== -->
+<div id="auth" class="wrap hidden">
+  <div class="logo" style="text-align:center;margin-bottom:18px">Studio<span>.</span></div>
+  <div class="card">
+    <h2>Entrar no painel</h2>
+    <p class="hint">Acesso restrito ao administrador. Use a conta autorizada para gerenciar as criadoras.</p>
+    <label>E-mail</label>
+    <input type="email" id="authEmail" placeholder="seu@email.com" />
+    <label>Senha</label>
+    <input type="password" id="authPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAuth()" />
+    <div style="height:16px"></div>
+    <button class="btn btn-primary" id="authBtn" onclick="doAuth()">Entrar</button>
+    <button class="btn btn-ghost hidden" id="demoBtn" style="width:100%;margin-top:10px" onclick="enterDemo()">👀 Ver painel em modo demonstração</button>
+    <p class="muted-small">Acesso exclusivo do administrador. · <a class="link" href="vitrine-agencia.html">voltar ao site</a></p>
+  </div>
+</div>
+
+<!-- ===================== APP (logado) ===================== -->
+<div id="app" class="wrap hidden">
+  <header>
+    <div class="logo">Studio<span>.</span></div>
+    <div class="who">Admin: <b id="userEmail"></b> · <a class="link" href="vitrine-agencia.html">ver site</a> · <button class="link" onclick="signOut()">sair</button></div>
+  </header>
+  <div id="demoBanner" class="setup hidden">Você está no <b>modo demonstração</b> — pode explorar tudo, mas <b>nada é salvo</b>. Conecte o Supabase para usar de verdade.</div>
+
+  <!-- ---------- LISTA DE CRIADORAS ---------- -->
+  <div id="listView">
+    <h1>Criadoras</h1>
+    <p class="sub">Cadastre quantas criadoras quiser. Cada uma que você publicar aparece automaticamente na vitrine.</p>
+    <div class="toolbar">
+      <span class="count" id="listCount"></span>
+      <button class="btn btn-primary" style="width:auto" onclick="newCreator()">+ Nova criadora</button>
+    </div>
+    <div class="list" id="creatorList"></div>
+  </div>
+
+  <!-- ---------- EDITOR ---------- -->
+  <div id="editView" class="hidden">
+    <div class="editor-head">
+      <button class="back" onclick="closeEditor()">← Voltar à lista</button>
+      <span class="count" id="editTag"></span>
+    </div>
+    <h1 id="editTitle">Nova criadora</h1>
+    <p class="sub">Preencha os dados. Marque "Publicar na vitrine" quando estiver pronta.</p>
+
+    <!-- PERFIL -->
+    <div class="card">
+      <h2>Informações do perfil</h2>
+      <p class="hint">Como ela aparece na vitrine.</p>
+      <div class="row">
+        <div><label>Nome artístico</label><input type="text" id="f_name" placeholder="Ex: Bia" /></div>
+        <div><label>@usuário</label><input type="text" id="f_handle" placeholder="@bia" /></div>
+      </div>
+      <label>Bio curta (aparece no card)</label>
+      <input type="text" id="f_bio" placeholder="Uma frase sobre ela e o conteúdo" />
+      <label>Descrição completa (aparece no perfil)</label>
+      <textarea id="f_desc" placeholder="O que ela publica, com que frequência, o que o assinante recebe."></textarea>
+      <div class="row">
+        <div><label>Nº de fotos</label><input type="text" id="f_photos" placeholder="120" /></div>
+        <div><label>Nº de vídeos</label><input type="text" id="f_videos" placeholder="40" /></div>
+      </div>
+      <label class="switch" style="margin-top:16px"><input type="checkbox" id="f_live" style="width:16px;height:16px"> Mostrar "Online agora" no card</label>
+    </div>
+
+    <!-- FOTOS -->
+    <div class="card">
+      <h2>Foto de perfil</h2>
+      <p class="hint">Imagem principal da criadora. Enviar uma nova substitui a anterior.</p>
+      <img id="avatarPrev" class="avatar-prev hidden" alt="" />
+      <div style="height:10px"></div>
+      <input type="file" id="avatarFile" accept="image/*" onchange="uploadAvatar(event)" />
+      <div style="height:8px"></div>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="removeAvatar()">Remover foto</button>
+
+      <h2 style="margin-top:24px">Prévias da galeria</h2>
+      <p class="hint">Fotos ou vídeos de prévia · <b>máximo 10</b> por criadora · até <b>100&nbsp;MB</b> cada · <b>arraste</b> para reordenar (ou use ‹ ›) · × remove (também apaga do servidor).</p>
+      <input type="file" id="galleryFile" accept="image/*,video/*" multiple onchange="uploadGallery(event)" />
+      <div class="hint" id="galCount" style="margin-top:8px"></div>
+      <div class="thumbs" id="galleryThumbs"></div>
+
+      <!-- barra de progresso (compartilhada por foto e galeria) -->
+      <div id="upWrap" class="up hidden"><div class="up-bar"><i id="upBar"></i></div><div class="up-txt" id="upTxt"></div></div>
+    </div>
+
+    <!-- AGENDA -->
+    <div class="card">
+      <h2>Agenda de lives</h2>
+      <p class="hint">Adicione data, horário e uma observação para cada live.</p>
+      <div id="schedList"></div>
+      <button class="btn btn-ghost" onclick="addSchedule()" style="margin-top:6px">+ Adicionar horário</button>
+    </div>
+
+    <!-- VALORES -->
+    <div class="card">
+      <h2>Valores e links</h2>
+      <p class="hint">Defina os preços e cole os links de pagamento do gateway.</p>
+      <div class="row">
+        <div><label>Preço do acesso completo</label><input type="text" id="f_priceAccess" placeholder="297 MZN" /></div>
+        <div>
+          <label>Link de pagamento (acesso)</label>
+          <input type="url" id="f_linkAccess" placeholder="https://debitopay.com/l/..." />
+          <div class="link-actions">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="pasteInto('f_linkAccess')">Colar</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="clearField('f_linkAccess')">Apagar</button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div><label>Preço do VIP no Telegram</label><input type="text" id="f_priceVip" placeholder="497 MZN" /></div>
+        <div>
+          <label>Link de pagamento (VIP Telegram)</label>
+          <input type="url" id="f_linkVip" placeholder="https://debitopay.com/l/..." />
+          <div class="link-actions">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="pasteInto('f_linkVip')">Colar</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="clearField('f_linkVip')">Apagar</button>
+          </div>
+        </div>
+      </div>
+      <label>Link do grupo/canal do Telegram (entregue após o pagamento · mesmo link em todas)</label>
+      <input type="url" id="f_telegram" placeholder="https://t.me/+..." />
+      <div class="link-actions">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="pasteInto('f_telegram')">Colar</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="clearField('f_telegram')">Apagar</button>
+      </div>
+    </div>
+
+    <!-- CONFIRMAÇÕES + PUBLICAÇÃO -->
+    <div class="card">
+      <h2>Confirmações e publicação</h2>
+      <p class="hint">Obrigatórias para publicar o perfil.</p>
+      <label class="check"><input type="checkbox" id="c_age"> <span>Confirmo que a criadora tem <b>18 anos ou mais</b> e que o documento de identidade já foi entregue à agência.</span></label>
+      <label class="check"><input type="checkbox" id="c_own"> <span>O conteúdo é <b>autoral</b> e há autorização para sua venda e distribuição (incluindo via Telegram) neste site.</span></label>
+      <label class="check"><input type="checkbox" id="c_remove"> <span>A criadora pode pedir a <b>remoção</b> do conteúdo a qualquer momento.</span></label>
+      <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+      <label class="switch"><input type="checkbox" id="f_approved" style="width:18px;height:18px"> <b>Publicar na vitrine</b> (visível para o público)</label>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveProfile()">Salvar criadora</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Supabase JS v2 + config compartilhado -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+/* =====================================================================
+   PAINEL DO ADMIN — gerencia VARIAS criadoras.
+   As credenciais ficam em supabase-config.js (SUPABASE_URL / ANON / ADMIN_EMAIL).
+   ===================================================================== */
+
+let creators = [];        // todas as criadoras (admin ve tudo)
+let formId = null;        // id da criadora sendo editada (ou nova gerada)
+let editing = false;      // true = editando existente, false = nova
+let gallery = [];
+let avatarUrl = "";
+let schedule = [];
+let DEMO = false;         // modo demonstração (sem Supabase, nada é salvo)
+
+/* ---------- util ---------- */
+function $(id){ return document.getElementById(id); }
+function toast(msg, isErr){
+  const t=$('toast');
+  t.textContent=msg; t.className='toast show'+(isErr?' err':'');
+  setTimeout(()=>t.className='toast',2800);
+}
+function needSetup(){
+  if(DEMO) return false;   // no modo demo nada precisa de Supabase
+  if(!sb){ toast('Configure o Supabase em supabase-config.js primeiro.',true); return true; }
+  return false;
+}
+function uid(){
+  return (crypto.randomUUID ? crypto.randomUUID()
+    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+        const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
+      }));
+}
+
+/* Colar (importar da área de transferência) e Apagar uma chave/link */
+async function pasteInto(id){
+  const el=$(id); if(!el) return;
+  try{
+    const t = await navigator.clipboard.readText();
+    if(t && t.trim()){ el.value = t.trim(); el.focus(); toast('Link colado.'); }
+    else { el.focus(); toast('Nada na área de transferência.', true); }
+  }catch(e){
+    el.focus();
+    toast('Cole manualmente (Ctrl+V ou segurar → Colar).', true);
+  }
+}
+function clearField(id){
+  const el=$(id); if(!el) return;
+  el.value=''; el.focus(); toast('Campo apagado. Lembre de salvar.');
+}
+
+/* ---------- AUTH (somente admin) ---------- */
+async function doAuth(){
+  if(needSetup()) return;
+  const email=$('authEmail').value.trim().toLowerCase();
+  const pass=$('authPass').value;
+  if(!email||!pass){ toast('Preencha e-mail e senha.',true); return; }
+  if(ADMIN_EMAIL && email !== ADMIN_EMAIL.toLowerCase()){
+    toast('Este e-mail não tem acesso ao painel.',true); return;
+  }
+  $('authBtn').disabled = true;
+  const res = await sb.auth.signInWithPassword({email,password:pass});
+  $('authBtn').disabled = false;
+  if(res.error){ toast(res.error.message,true); return; }
+  if(res.data.session){ onLogin(res.data.user); }
+}
+async function signOut(){ await sb.auth.signOut(); location.reload(); }
+
+/* ---------- UPLOAD DE IMAGENS (Storage) ---------- */
+const MAX_BYTES = 100 * 1024 * 1024;   // 100 MB por arquivo
+const MAX_GALLERY = 10;                // máximo de 10 prévias por criadora
+
+/* progresso (UI) */
+function showProgress(txt){ $('upWrap').classList.remove('hidden'); $('upBar').style.width='0%'; $('upTxt').textContent=txt||'Enviando…'; }
+function setProgress(p, txt){ $('upBar').style.width=Math.round(p*100)+'%'; if(txt!=null) $('upTxt').textContent=txt; }
+function hideProgress(){ $('upWrap').classList.add('hidden'); }
+
+/* Upload via XHR direto no Storage — permite barra de progresso real.
+   Valida o limite de 100 MB antes de enviar. */
+async function uploadFile(file, onProgress){
+  if(file.size > MAX_BYTES){
+    toast(`"${file.name}" tem ${(file.size/1048576).toFixed(0)} MB — o limite é 100 MB.`, true);
+    return null;
+  }
+  if(DEMO){   // demo: mostra a prévia local, sem enviar pro servidor
+    if(onProgress){ onProgress(0.5); await new Promise(r=>setTimeout(r,150)); onProgress(1); }
+    return URL.createObjectURL(file);
+  }
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ toast('Sua sessão expirou. Entre de novo.', true); return null; }
+
+  const path = `${formId}/${Date.now()}-${file.name.replace(/[^a-z0-9.\-_]/gi,'_')}`;
+  const url  = `${SUPABASE_URL}/storage/v1/object/creator-media/${path}`;
+
+  return await new Promise((resolve)=>{
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('authorization', `Bearer ${session.access_token}`);
+    xhr.setRequestHeader('apikey', SUPABASE_ANON_KEY);
+    xhr.setRequestHeader('x-upsert', 'true');
+    if(file.type) xhr.setRequestHeader('content-type', file.type);
+    xhr.upload.onprogress = (e)=>{ if(e.lengthComputable && onProgress) onProgress(e.loaded/e.total); };
+    xhr.onload = ()=>{
+      if(xhr.status >= 200 && xhr.status < 300){
+        const { data } = sb.storage.from('creator-media').getPublicUrl(path);
+        resolve(data.publicUrl);
+      } else {
+        let msg = 'falha no upload';
+        try { msg = JSON.parse(xhr.responseText).message || msg; } catch(_){}
+        toast('Erro ao enviar: '+msg, true);
+        resolve(null);
+      }
+    };
+    xhr.onerror = ()=>{ toast('Erro de rede no upload.', true); resolve(null); };
+    xhr.send(file);
+  });
+}
+async function uploadAvatar(e){
+  if(needSetup()) return;
+  const f=e.target.files[0]; if(!f) return;
+  const old=avatarUrl;
+  showProgress('Enviando foto…');
+  const url=await uploadFile(f, (p)=>setProgress(p));
+  hideProgress();
+  e.target.value='';
+  if(!url) return;
+  avatarUrl=url;
+  const img=$('avatarPrev'); img.src=url; img.classList.remove('hidden');
+  if(old && old!==url) deleteFromStorage(old);   // apaga a foto antiga do servidor
+  toast('Foto de perfil enviada.');
+}
+function removeAvatar(){
+  if(!avatarUrl){ toast('Não há foto para remover.',true); return; }
+  deleteFromStorage(avatarUrl);
+  avatarUrl='';
+  const img=$('avatarPrev'); img.src=''; img.classList.add('hidden');
+  $('avatarFile').value='';
+  toast('Foto removida. Lembre de salvar.');
+}
+// Apaga um arquivo do bucket a partir da URL pública (best-effort).
+async function deleteFromStorage(url){
+  try{
+    if(!sb || !url) return;
+    const marker='/creator-media/';
+    const i=url.indexOf(marker);
+    if(i<0) return;
+    const path=decodeURIComponent(url.slice(i+marker.length).split('?')[0]);
+    await sb.storage.from('creator-media').remove([path]);
+  }catch(e){ /* arquivo pode já não existir; ignora */ }
+}
+async function uploadGallery(e){
+  if(needSetup()) return;
+  let files=[...e.target.files]; if(!files.length) return;
+  const free = MAX_GALLERY - gallery.length;
+  if(free <= 0){
+    e.target.value='';
+    toast(`Limite de ${MAX_GALLERY} imagens por criadora. Remova alguma para enviar outra.`, true);
+    return;
+  }
+  if(files.length > free){
+    toast(`Só cabem mais ${free} (máx. ${MAX_GALLERY}). Enviando as ${free} primeiras.`, true);
+    files = files.slice(0, free);
+  }
+  let ok=0, n=0;
+  for(const f of files){
+    n++;
+    showProgress(`Enviando ${n}/${files.length}: ${f.name}`);
+    const url=await uploadFile(f, (p)=>setProgress(p));
+    if(url){ gallery.push(url); ok++; renderGallery(); }
+  }
+  hideProgress();
+  e.target.value='';   // permite reenviar o mesmo arquivo depois
+  toast(ok ? `${ok} enviado(s) · ${gallery.length}/${MAX_GALLERY}` : 'Nenhum arquivo enviado.', !ok);
+}
+function isVideo(u){ return /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u||''); }
+function renderGallery(){
+  $('galleryThumbs').innerHTML = gallery.map((u,i)=>`
+    <div class="thumb-wrap" draggable="true"
+         ondragstart="galDragStart(event,${i})" ondragover="galDragOver(event,${i})"
+         ondragleave="galDragLeave(event)" ondrop="galDrop(event,${i})" ondragend="galDragEnd(event)">
+      ${isVideo(u)
+        ? `<video class="thumb" src="${u}" muted playsinline preload="metadata"></video><span class="thumb-badge">VÍDEO</span>`
+        : `<img class="thumb" src="${u}" alt="">`}
+      <button class="thumb-x" title="remover" onclick="removeGalleryItem(${i})">×</button>
+      <div class="thumb-move">
+        <button title="mover para a esquerda" onclick="moveGalleryItem(${i},-1)" ${i===0?'disabled':''}>‹</button>
+        <button title="mover para a direita" onclick="moveGalleryItem(${i},1)" ${i===gallery.length-1?'disabled':''}>›</button>
+      </div>
+    </div>`).join('');
+  const c=$('galCount');
+  if(c) c.textContent = `${gallery.length} de ${MAX_GALLERY}` + (gallery.length>=MAX_GALLERY ? ' · limite atingido' : '');
+  const inp=$('galleryFile');
+  if(inp) inp.disabled = gallery.length>=MAX_GALLERY;
+}
+function moveGalleryItem(i,dir){
+  const j=i+dir; if(j<0||j>=gallery.length) return;
+  const t=gallery[i]; gallery[i]=gallery[j]; gallery[j]=t; renderGallery();
+}
+async function removeGalleryItem(i){
+  const url=gallery[i];
+  gallery.splice(i,1); renderGallery();
+  await deleteFromStorage(url);   // remove também do Storage
+}
+
+/* arrastar para reordenar (desktop). No celular use os botões ‹ › */
+let _dragFrom=null;
+function galDragStart(e,i){
+  _dragFrom=i; e.currentTarget.classList.add('dragging');
+  try{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',String(i)); }catch(_){}
+}
+function galDragOver(e,i){
+  e.preventDefault();
+  try{ e.dataTransfer.dropEffect='move'; }catch(_){}
+  if(_dragFrom!==null && _dragFrom!==i) e.currentTarget.classList.add('over');
+}
+function galDragLeave(e){ e.currentTarget.classList.remove('over'); }
+function galDrop(e,i){
+  e.preventDefault();
+  const from = _dragFrom!==null ? _dragFrom : parseInt((e.dataTransfer&&e.dataTransfer.getData('text/plain'))||'-1',10);
+  _dragFrom=null;
+  if(from<0 || from===i || from>=gallery.length) { renderGallery(); return; }
+  const item=gallery.splice(from,1)[0];
+  gallery.splice(i,0,item);
+  renderGallery();
+}
+function galDragEnd(){
+  _dragFrom=null;
+  document.querySelectorAll('.thumb-wrap.dragging,.thumb-wrap.over').forEach(el=>el.classList.remove('dragging','over'));
+}
+
+/* ---------- AGENDA ---------- */
+function addSchedule(item){
+  schedule.push(item||{date:'',time:'',note:''}); renderSchedule();
+}
+function renderSchedule(){
+  $('schedList').innerHTML = schedule.map((s,i)=>`
+    <div class="sched-item">
+      <div><label>Data</label><input type="date" value="${s.date||''}" onchange="schedule[${i}].date=this.value"></div>
+      <div><label>Hora</label><input type="time" value="${s.time||''}" onchange="schedule[${i}].time=this.value"></div>
+      <div><label>Observação</label><input type="text" value="${(s.note||'').replace(/"/g,'&quot;')}" placeholder="Ex: live especial" onchange="schedule[${i}].note=this.value"></div>
+      <button class="sched-x" onclick="schedule.splice(${i},1);renderSchedule()">×</button>
+    </div>`).join('');
+}
+
+/* ---------- LISTA DE CRIADORAS ---------- */
+async function loadCreators(){
+  if(DEMO){ renderList(); return; }
+  if(needSetup()) return;
+  const { data, error } = await sb.from('creators').select('*')
+    .order('sort_order',{ascending:true}).order('updated_at',{ascending:false});
+  if(error){ toast(error.message,true); return; }
+  creators = data||[];
+  renderList();
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function renderList(){
+  $('listCount').textContent = creators.length
+    ? `${creators.length} criadora(s) · ${creators.filter(c=>c.approved).length} publicada(s)`
+    : '';
+  const el=$('creatorList');
+  if(!creators.length){
+    el.innerHTML = '<div class="empty">Nenhuma criadora ainda. Toque em <b>+ Nova criadora</b> para começar.</div>';
+    return;
+  }
+  el.innerHTML = creators.map(c=>`
+    <div class="item">
+      <div class="av" style="${c.avatar_url?`background-image:url('${esc(c.avatar_url)}')`:''}"></div>
+      <div class="meta">
+        <div class="nm">${esc(c.name)||'(sem nome)'}
+          <span class="pill ${c.approved?'on':'off'}">${c.approved?'Publicada':'Rascunho'}</span>
+          ${c.is_live?'<span class="pill on">Online</span>':''}
+        </div>
+        <div class="hd">${esc(c.handle)||''}</div>
+      </div>
+      <div class="acts">
+        <button class="btn btn-ghost btn-sm" onclick="editCreator('${c.id}')">Editar</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleApprove('${c.id}')">${c.approved?'Despublicar':'Publicar'}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCreator('${c.id}')">Excluir</button>
+      </div>
+    </div>`).join('');
+}
+
+async function toggleApprove(id){
+  const c = creators.find(x=>String(x.id)===String(id)); if(!c) return;
+  if(!c.approved && !(c.confirmed_age && c.confirmed_ownership && c.confirmed_removal)){
+    toast('Para publicar, abra e marque as três confirmações.',true); return;
+  }
+  if(DEMO){ c.approved=!c.approved; toast(c.approved?'Publicada (demo)':'Despublicada (demo)'); renderList(); return; }
+  const { error } = await sb.from('creators').update({approved:!c.approved, updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){ toast(error.message,true); return; }
+  toast(c.approved?'Despublicada.':'Publicada na vitrine!');
+  loadCreators();
+}
+
+async function deleteCreator(id){
+  const c = creators.find(x=>String(x.id)===String(id)); if(!c) return;
+  if(!confirm(`Excluir "${c.name||'esta criadora'}" definitivamente? Esta ação não pode ser desfeita.`)) return;
+  if(DEMO){ creators = creators.filter(x=>String(x.id)!==String(id)); toast('Excluída (demo).'); renderList(); return; }
+  const { error } = await sb.from('creators').delete().eq('id',id);
+  if(error){ toast(error.message,true); return; }
+  toast('Criadora excluída.');
+  loadCreators();
+}
+
+/* ---------- EDITOR (abrir/fechar) ---------- */
+function showList(){ $('listView').classList.remove('hidden'); $('editView').classList.add('hidden'); }
+function showEditor(){ $('listView').classList.add('hidden'); $('editView').classList.remove('hidden'); window.scrollTo(0,0); }
+function closeEditor(){ showList(); }
+
+function clearForm(){
+  ['f_name','f_handle','f_bio','f_desc','f_photos','f_videos',
+   'f_priceAccess','f_linkAccess','f_priceVip','f_linkVip','f_telegram'].forEach(id=>$(id).value='');
+  ['f_live','c_age','c_own','c_remove','f_approved'].forEach(id=>$(id).checked=false);
+  avatarUrl=''; gallery=[]; schedule=[];
+  $('avatarPrev').src=''; $('avatarPrev').classList.add('hidden');
+  $('avatarFile').value=''; $('galleryFile').value='';
+  renderGallery(); renderSchedule();
+}
+
+function newCreator(){
+  if(needSetup()) return;
+  editing=false; formId=uid(); clearForm();
+  $('editTitle').textContent='Nova criadora';
+  $('editTag').textContent='Novo cadastro';
+  showEditor();
+}
+
+function editCreator(id){
+  const d = creators.find(x=>String(x.id)===String(id)); if(!d) return;
+  editing=true; formId=d.id; clearForm();
+  $('f_name').value=d.name||''; $('f_handle').value=d.handle||'';
+  $('f_bio').value=d.bio||''; $('f_desc').value=d.description||'';
+  $('f_photos').value=d.photos_count||''; $('f_videos').value=d.videos_count||'';
+  $('f_live').checked=!!d.is_live;
+  $('f_priceAccess').value=d.access_price||''; $('f_linkAccess').value=d.checkout_access||'';
+  $('f_priceVip').value=d.vip_price||''; $('f_linkVip').value=d.checkout_vip||'';
+  $('f_telegram').value=d.telegram_link||'';
+  $('c_age').checked=!!d.confirmed_age; $('c_own').checked=!!d.confirmed_ownership; $('c_remove').checked=!!d.confirmed_removal;
+  $('f_approved').checked=!!d.approved;
+  avatarUrl=d.avatar_url||'';
+  if(avatarUrl){ const img=$('avatarPrev'); img.src=avatarUrl; img.classList.remove('hidden'); }
+  gallery=Array.isArray(d.gallery)?d.gallery.slice():[];
+  schedule=Array.isArray(d.schedule)?d.schedule.slice():[];
+  renderGallery(); renderSchedule();
+  $('editTitle').textContent='Editar criadora';
+  $('editTag').textContent='Editando';
+  showEditor();
+}
+
+/* ---------- SALVAR ---------- */
+async function saveProfile(){
+  if(needSetup()) return;
+  const wantPublish = $('f_approved').checked;
+  if(wantPublish && !($('c_age').checked && $('c_own').checked && $('c_remove').checked)){
+    toast('Para publicar, marque as três confirmações.',true); return;
+  }
+  if(!$('f_name').value.trim()){ toast('Dê pelo menos um nome à criadora.',true); return; }
+
+  const payload={
+    id: formId,
+    name:$('f_name').value.trim(), handle:$('f_handle').value.trim(),
+    bio:$('f_bio').value.trim(), description:$('f_desc').value.trim(),
+    photos_count:$('f_photos').value.trim(), videos_count:$('f_videos').value.trim(),
+    is_live:$('f_live').checked,
+    avatar_url:avatarUrl, gallery:gallery, schedule:schedule,
+    access_price:$('f_priceAccess').value.trim(), checkout_access:$('f_linkAccess').value.trim(),
+    vip_price:$('f_priceVip').value.trim(), checkout_vip:$('f_linkVip').value.trim(),
+    telegram_link:$('f_telegram').value.trim(),
+    confirmed_age:$('c_age').checked, confirmed_ownership:$('c_own').checked, confirmed_removal:$('c_remove').checked,
+    approved:wantPublish,
+    updated_at:new Date().toISOString()
+  };
+  if(DEMO){
+    demoUpsert(payload);
+    toast((editing?'Atualizada':'Cadastrada')+' (demo — não persiste).');
+    renderList(); closeEditor(); return;
+  }
+  const { error } = await sb.from('creators').upsert(payload);
+  if(error){ toast(error.message,true); return; }
+  toast(editing?'Criadora atualizada!':'Criadora cadastrada!');
+  await loadCreators();
+  closeEditor();
+}
+
+/* ---------- INICIAR ---------- */
+async function onLogin(user){
+  $('userEmail').textContent=user.email;
+  $('auth').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  showList();
+  await loadCreators();
+}
+/* ---------- MODO DEMONSTRAÇÃO (sem Supabase, nada é salvo) ---------- */
+function demoUpsert(p){
+  const i=creators.findIndex(c=>String(c.id)===String(p.id));
+  if(i>=0) creators[i]={...creators[i],...p}; else creators.push(p);
+}
+function enterDemo(){
+  DEMO=true;
+  $('userEmail').textContent=(typeof ADMIN_EMAIL!=='undefined'?ADMIN_EMAIL:'admin')+' · DEMO';
+  $('auth').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('demoBanner').classList.remove('hidden');
+  creators=[
+    { id:'demo-biby', name:'Biby', handle:'@biby', bio:'Conteúdo autoral exclusivo, toda semana.',
+      description:'Acesso à galeria completa e ao grupo VIP no Telegram, com novidades em primeira mão.',
+      photos_count:'120', videos_count:'40', is_live:true, avatar_url:'', gallery:[], schedule:[],
+      access_price:'297 MZN', checkout_access:'https://debitopay.com/l/ativacao-standard-biby-f4y5',
+      vip_price:'497 MZN', checkout_vip:'https://debitopay.com/l/pacote-vp-comunidade-w4iq', telegram_link:'',
+      confirmed_age:true, confirmed_ownership:true, confirmed_removal:true, approved:true, updated_at:new Date().toISOString() },
+    { id:'demo-2', name:'Exemplo (rascunho)', handle:'@exemplo', bio:'Perfil de exemplo não publicado.',
+      description:'', photos_count:'', videos_count:'', is_live:false, avatar_url:'', gallery:[], schedule:[],
+      access_price:'', checkout_access:'', vip_price:'', checkout_vip:'', telegram_link:'',
+      confirmed_age:false, confirmed_ownership:false, confirmed_removal:false, approved:false, updated_at:new Date().toISOString() }
+  ];
+  showList(); renderList();
+  toast('Modo demonstração — nada é salvo de verdade.');
+}
+
+(async function init(){
+  if(!sb){ $('auth').classList.remove('hidden'); $('demoBtn').classList.remove('hidden'); return; }
+  const { data } = await sb.auth.getSession();
+  if(data.session){ onLogin(data.session.user); }
+  else { $('auth').classList.remove('hidden'); }
+})();
+</script>
+</body>
+</html>
