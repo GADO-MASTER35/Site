@@ -167,6 +167,9 @@
   .preview .lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:#fff;background:radial-gradient(circle at 50% 40%,rgba(224,42,58,.20),rgba(10,7,9,.4))}
   .preview .lock svg{width:30px;height:30px;filter:drop-shadow(0 2px 6px #000)}
   .preview .lock span{font-size:11px;font-weight:800;letter-spacing:.04em;text-shadow:0 1px 6px #000;text-align:center;padding:0 8px}
+  .preview.playable{cursor:pointer}
+  .preview .play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.7);background:rgba(0,0,0,.18);transition:opacity .2s}
+  .preview.playing .play-overlay{opacity:0}
   @media(max-width:760px){ .previews{grid-template-columns:repeat(2,1fr);gap:10px} }
 
   /* ---------- dificultar download de mídias (deterrente) ---------- */
@@ -807,10 +810,15 @@ function renderPreviews(gallery){
   const unlocked = !!(UNLOCK && UNLOCK.access);   // cliente que já pagou vê tudo
   box.innerHTML = gallery.map((it,i)=>{
     const u = gUrl(it);
-    const media = isVid(u)
-      ? `<video src="${u}" muted playsinline preload="metadata" controlsList="nodownload" disablepictureinpicture></video><span class="vbadge">VÍDEO</span>`
+    const vid = isVid(u);
+    const media = vid
+      ? `<video src="${u}" loop muted playsinline preload="metadata" controlsList="nodownload" disablepictureinpicture></video><span class="vbadge">VÍDEO</span>`
       : `<img src="${u}" alt="" loading="lazy" draggable="false">`;
-    if(unlocked || gFree(it,i)) return `<div class="preview">${media}</div>`;
+    if(unlocked || gFree(it,i)){
+      return vid
+        ? `<div class="preview playable" onclick="togglePreview(this)">${media}<span class="play-overlay">▶</span></div>`
+        : `<div class="preview">${media}</div>`;
+    }
     return `<div class="preview locked" onclick="scrollToPlans()">${media}
       <div class="lock">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.5A4.5 4.5 0 0 0 7.5 6v3H6.75A2.25 2.25 0 0 0 4.5 11.25v8.25A2.25 2.25 0 0 0 6.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-8.25A2.25 2.25 0 0 0 17.25 9H16.5V6A4.5 4.5 0 0 0 12 1.5zm-3 7.5V6a3 3 0 1 1 6 0v3H9z"/></svg>
@@ -819,6 +827,12 @@ function renderPreviews(gallery){
   }).join('');
 }
 function scrollToPlans(){ const p=document.getElementById('d-plans'); if(p) p.scrollIntoView({behavior:'smooth',block:'center'}); }
+// prévia em vídeo: 1 clique dá play/pause no lugar (loop, sem tela cheia — tipo GIF)
+function togglePreview(el){
+  const v=el.querySelector('video'); if(!v) return;
+  if(v.paused){ v.play().catch(()=>{}); el.classList.add('playing'); }
+  else { v.pause(); el.classList.remove('playing'); }
+}
 
 /* ---------- HISTÓRICO (FAKE) DE COMPRAS — sobe a cada 5s ---------- */
 // nomes moçambicanos reais — combinados aleatoriamente (nome + sobrenome)
