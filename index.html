@@ -705,6 +705,14 @@ function applyUnlockUI(){
   }
 }
 
+/* ---------- Nº de assinantes (aleatório, atrativo e estável por criadora) ---------- */
+function fakeSubs(id){
+  let h=0; const s=String(id||'x');
+  for(let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))>>>0; }
+  const n = 2500 + (h % 15500);            // ~2.500 a ~18.000 assinantes
+  return n.toLocaleString('pt-BR');         // ex: "12.847"
+}
+
 /* ---------- Abrir detalhe ---------- */
 function openCreator(id){
   const c = CREATORS.find(x => String(x.id) === String(id));
@@ -714,7 +722,7 @@ function openCreator(id){
   document.getElementById('d-handle').textContent = c.handle;
   document.getElementById('d-photos').textContent = c.photos;
   document.getElementById('d-videos').textContent = c.videos;
-  document.getElementById('d-subs').textContent   = c.subs;
+  document.getElementById('d-subs').textContent   = fakeSubs(c.id);
   document.getElementById('d-desc').textContent   = c.desc;
 
   // foto de perfil
