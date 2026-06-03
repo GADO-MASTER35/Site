@@ -172,6 +172,17 @@
   .preview,.preview img,.preview video,#d-avatar,.creator .thumb{-webkit-user-select:none;user-select:none}
   .preview img,.preview video{pointer-events:none}
 
+  /* ---------- recuperar acesso / VIP liberado ---------- */
+  .vip-ready{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:rgba(95,208,154,.10);border:1px solid rgba(95,208,154,.4);border-radius:14px;padding:14px 16px;margin-bottom:20px;color:var(--ink);font-weight:600}
+  .vip-ready .btn{width:auto}
+  .recover{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:30px}
+  .recover-q{font-weight:700;font-size:14px;margin-bottom:10px}
+  .recover-row{display:flex;gap:10px;flex-wrap:wrap}
+  .recover-row input{flex:1;min-width:160px;background:#15111780;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:12px 13px;font-family:var(--body);font-size:15px}
+  .recover-row input:focus{outline:none;border-color:var(--accent)}
+  .recover-row .btn{width:auto}
+  .recover-msg{font-size:13px;margin-top:10px;min-height:1em}
+
   /* ---------- destaque dos cards da vitrine ---------- */
   .creator{box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 0 1px rgba(224,42,58,.10)}
   .creator:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 16px 46px rgba(224,42,58,.42)}
@@ -441,6 +452,22 @@
         <div class="previews" id="d-previews"></div>
       </div>
 
+      <!-- VIP já liberado (cliente que pagou) -->
+      <div id="d-vip-ready" class="vip-ready" style="display:none">
+        <span>✅ Seu acesso VIP está liberado.</span>
+        <a id="d-vip-link" class="btn btn-tg" href="#" target="_blank" rel="noopener">Entrar no grupo VIP</a>
+      </div>
+
+      <!-- Já é cliente? recupera o acesso pelo telefone usado no pagamento -->
+      <div class="recover">
+        <div class="recover-q">Já é cliente? Digite seu telefone e tenha acesso</div>
+        <div class="recover-row">
+          <input id="recPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Seu nº (ex: 84 000 0000)" onkeydown="if(event.key==='Enter')recoverAccess()" />
+          <button id="recBtn" class="btn btn-ghost" onclick="recoverAccess()">Tenho acesso</button>
+        </div>
+        <div id="recMsg" class="recover-msg"></div>
+      </div>
+
       <div class="section-head"><h3>Planos de assinatura</h3></div>
       <div class="plans" id="d-plans"></div>
       <div style="height:50px"></div>
@@ -616,6 +643,46 @@ function goVip(url){
   catch(e){ target = url + (url.includes('?')?'&':'?') + 'reference=' + encodeURIComponent(ref); }
   location.href = target;   // mesma aba: o gateway traz o cliente de volta
 }
+function goAccess(url){
+  if(!url || url === '#'){ return; }
+  const ref = `${currentCreatorId||'x'}__access__${Date.now().toString(36)}${Math.random().toString(36).slice(2,7)}`;
+  try{ localStorage.setItem('studio_lastRef', ref); }catch(e){}
+  let target = url;
+  try{ const u = new URL(url); u.searchParams.set('reference', ref); target = u.toString(); }
+  catch(e){ target = url + (url.includes('?')?'&':'?') + 'reference=' + encodeURIComponent(ref); }
+  location.href = target;
+}
+
+/* ---------- Estado de acesso do cliente (quem já pagou) ---------- */
+let UNLOCK = (function(){ try{ return JSON.parse(localStorage.getItem('studio_unlock')||'null')||{}; }catch(e){ return {}; } })();
+function setUnlock(u){ UNLOCK = Object.assign({}, UNLOCK, u); try{ localStorage.setItem('studio_unlock', JSON.stringify(UNLOCK)); }catch(e){} }
+function recMsg(m, err){ const e=document.getElementById('recMsg'); if(e){ e.textContent=m||''; e.style.color=err?'var(--accent)':'var(--ok)'; } }
+async function recoverAccess(){
+  const inp=document.getElementById('recPhone'), btn=document.getElementById('recBtn');
+  const phone=(inp.value||'').replace(/\D/g,'');
+  if(phone.length<9){ recMsg('Digite um número válido (9 dígitos).', true); return; }
+  if(typeof SUPABASE_URL==='undefined' || !String(SUPABASE_URL).startsWith('http')){ recMsg('Pagamentos ainda não conectados.', true); return; }
+  btn.disabled=true; recMsg('Verificando…');
+  try{
+    const r=await fetch(`${SUPABASE_URL}/functions/v1/unlock?phone=${encodeURIComponent(phone)}`,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY}});
+    const d=await r.json();
+    if(d && d.paid){
+      setUnlock({access:true, vip:!!d.vip, telegram:d.telegram||UNLOCK.telegram||null});
+      recMsg('✅ Acesso liberado!');
+      if(currentCreatorId) openCreator(currentCreatorId);   // re-renderiza desbloqueado
+    } else {
+      recMsg('Não encontramos uma compra com esse número.', true);
+    }
+  }catch(e){ recMsg('Erro ao verificar. Tente de novo.', true); }
+  btn.disabled=false;
+}
+function applyUnlockUI(){
+  const ready=document.getElementById('d-vip-ready'), link=document.getElementById('d-vip-link');
+  if(ready && link){
+    if(UNLOCK && UNLOCK.vip && UNLOCK.telegram){ link.href=UNLOCK.telegram; ready.style.display='flex'; }
+    else { ready.style.display='none'; }
+  }
+}
 
 /* ---------- Abrir detalhe ---------- */
 function openCreator(id){
@@ -649,8 +716,9 @@ function openCreator(id){
     }).join('');
   } else { sw.style.display='none'; }
 
-  // prévias (5 grátis + restante com cadeado)
+  // prévias (5 grátis + restante com cadeado; tudo liberado se já pagou)
   renderPreviews(c.gallery || []);
+  applyUnlockUI();
 
   document.getElementById('d-plans').innerHTML = c.plans.map(p => `
     <div class="plan ${p.best?'best':''}">
@@ -661,7 +729,7 @@ function openCreator(id){
       <ul>${p.perks.map(k=>`<li>${k}</li>`).join('')}</ul>
       ${p.telegram
         ? `<a class="btn btn-tg" href="${p.checkoutUrl}" onclick="event.preventDefault();goVip('${p.checkoutUrl}')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>Pagar e entrar no VIP</a>`
-        : `<a class="btn btn-primary" href="${p.checkoutUrl}" target="_blank" rel="noopener">Assinar</a>`}
+        : `<a class="btn btn-primary" href="${p.checkoutUrl}" onclick="event.preventDefault();goAccess('${p.checkoutUrl}')">Assinar</a>`}
     </div>
   `).join('');
 
@@ -702,11 +770,12 @@ function renderPreviews(gallery){
   const box=document.getElementById('d-previews');
   if(!gallery || !gallery.length){ wrap.style.display='none'; box.innerHTML=''; return; }
   wrap.style.display='block';
+  const unlocked = !!(UNLOCK && UNLOCK.access);   // cliente que já pagou vê tudo
   box.innerHTML = gallery.map((u,i)=>{
     const media = isVid(u)
       ? `<video src="${u}" muted playsinline preload="metadata" controlsList="nodownload" disablepictureinpicture></video><span class="vbadge">VÍDEO</span>`
       : `<img src="${u}" alt="" loading="lazy" draggable="false">`;
-    if(i < FREE_PREVIEWS) return `<div class="preview">${media}</div>`;
+    if(unlocked || i < FREE_PREVIEWS) return `<div class="preview">${media}</div>`;
     return `<div class="preview locked" onclick="scrollToPlans()">${media}
       <div class="lock">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.5A4.5 4.5 0 0 0 7.5 6v3H6.75A2.25 2.25 0 0 0 4.5 11.25v8.25A2.25 2.25 0 0 0 6.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-8.25A2.25 2.25 0 0 0 17.25 9H16.5V6A4.5 4.5 0 0 0 12 1.5zm-3 7.5V6a3 3 0 1 1 6 0v3H9z"/></svg>

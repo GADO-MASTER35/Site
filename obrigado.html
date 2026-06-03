@@ -53,12 +53,13 @@
     <div id="ok" class="hidden">
       <div class="icon">✅</div>
       <h1>Pagamento confirmado!</h1>
-      <p>Seu acesso ao grupo VIP está liberado. Toque no botão abaixo para entrar no Telegram.</p>
+      <p id="okMsg">Seu acesso está liberado.</p>
       <a id="tgBtn" class="btn btn-tg" href="#" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
         Entrar no grupo VIP
       </a>
-      <p class="small">Guarde este link. Ele é pessoal e foi liberado para o seu pagamento.</p>
+      <a id="siteBtn" class="btn btn-tg hidden" href="index.html">Ver a galeria completa no site</a>
+      <p class="small">Guarde este acesso. Foi liberado para o seu pagamento.</p>
     </div>
 
     <!-- 3) ainda nao confirmado -->
@@ -92,9 +93,9 @@
   let ref = q.get('reference') || q.get('ref') || q.get('transaction_id') || q.get('payment_id') || q.get('id') || '';
   try{ if(!ref) ref = localStorage.getItem('studio_lastRef') || ''; }catch(e){}
 
-  // se já foi confirmado antes (nesta visita/navegador), mostra direto
+  // se já foi confirmado antes (nesta visita/navegador), aproveita o link
   try{
-    const cached = JSON.parse(localStorage.getItem('studio_vip')||'null');
+    const cached = JSON.parse(localStorage.getItem('studio_unlock')||'null');
     if(cached && cached.telegram){ document.getElementById('tgBtn').href = cached.telegram; }
   }catch(e){}
 
@@ -112,16 +113,17 @@
       const url = `${SUPABASE_URL}/functions/v1/unlock?reference=${encodeURIComponent(ref)}`;
       const r = await fetch(url, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } });
       const data = await r.json();
-      if(data.paid && data.telegram){
-        $('tgBtn').href = data.telegram;
-        try{ localStorage.setItem('studio_vip', JSON.stringify({telegram:data.telegram, ref:ref, at:Date.now()})); }catch(e){}
+      if(data.paid){
+        // grava o estado pro site desbloquear a galeria (mesmo se recarregar)
+        try{ localStorage.setItem('studio_unlock', JSON.stringify({access:true, vip:!!data.vip, telegram:data.telegram||null})); }catch(e){}
+        if(data.telegram){
+          $('tgBtn').href = data.telegram; $('tgBtn').classList.remove('hidden'); $('siteBtn').classList.add('hidden');
+          $('okMsg').textContent = 'Seu acesso VIP está liberado. Toque para entrar no Telegram.';
+        } else {
+          $('tgBtn').classList.add('hidden'); $('siteBtn').classList.remove('hidden');
+          $('okMsg').textContent = 'Sua galeria completa foi liberada. Toque para ver no site.';
+        }
         show('ok');
-        return;
-      }
-      if(data.paid && !data.telegram){
-        // pago, mas plano sem telegram (ex: acesso). Manda de volta ao site.
-        $('#pending') && show('ok');
-        $('tgBtn').classList.add('hidden');
         return;
       }
     }catch(e){ /* tenta de novo */ }

@@ -33,24 +33,37 @@ Deno.serve(async (req) => {
     url.searchParams.get("payment_id") ||
     url.searchParams.get("id") ||
     "";
+  // "ja sou cliente": recuperar acesso pelo telefone usado no pagamento
+  const phone = (url.searchParams.get("phone") || "").replace(/\D/g, "").slice(-9);
 
-  if (!ref) return json({ paid: false, reason: "sem-referencia" });
+  if (!ref && !phone) return json({ paid: false, reason: "sem-dados" });
 
   const sb = createClient(SUPABASE_URL, SERVICE_KEY);
-  const { data, error } = await sb
-    .from("payments")
-    .select("status, plan, telegram_link")
-    .eq("status", "completed")
-    .or(`our_ref.eq.${ref},provider_ref.eq.${ref}`)
-    .limit(1);
 
-  if (error) return json({ paid: false, error: error.message }, 200);
-
-  const row = data && data[0];
-  if (row && row.plan === "vip") {
-    // libera o link unico do Telegram (secret) ou, se nao houver, o do registro
-    return json({ paid: true, telegram: TELEGRAM_VIP || row.telegram_link || null });
+  let rows: any[] = [];
+  if (ref) {
+    const { data, error } = await sb
+      .from("payments").select("plan")
+      .eq("status", "completed")
+      .or(`our_ref.eq.${ref},provider_ref.eq.${ref}`)
+      .limit(20);
+    if (error) return json({ paid: false, error: error.message });
+    rows = data || [];
+  } else {
+    // compara o telefone normalizado (so digitos, ultimos 9)
+    const { data, error } = await sb
+      .from("payments").select("plan, customer_phone")
+      .eq("status", "completed")
+      .not("customer_phone", "is", null)
+      .limit(1000);
+    if (error) return json({ paid: false, error: error.message });
+    rows = (data || []).filter((r: any) =>
+      String(r.customer_phone || "").replace(/\D/g, "").slice(-9) === phone);
   }
-  if (row) return json({ paid: true, telegram: null }); // pago, mas plano sem Telegram
-  return json({ paid: false });
+
+  if (!rows.length) return json({ paid: false });
+
+  const vip = rows.some((r: any) => r.plan === "vip");
+  // qualquer pagamento confirmado da acesso a galeria; VIP tambem da o Telegram
+  return json({ paid: true, access: true, vip, telegram: vip ? (TELEGRAM_VIP || null) : null });
 });
