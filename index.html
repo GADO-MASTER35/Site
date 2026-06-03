@@ -830,8 +830,15 @@ function scrollToPlans(){ const p=document.getElementById('d-plans'); if(p) p.sc
 // prévia em vídeo: 1 clique dá play/pause no lugar (loop, sem tela cheia — tipo GIF)
 function togglePreview(el){
   const v=el.querySelector('video'); if(!v) return;
-  if(v.paused){ v.play().catch(()=>{}); el.classList.add('playing'); }
-  else { v.pause(); el.classList.remove('playing'); }
+  if(v.paused){
+    // toca só um por vez: pausa qualquer outra prévia que esteja tocando
+    document.querySelectorAll('#d-previews .preview.playing').forEach(p=>{
+      if(p!==el){ const ov=p.querySelector('video'); if(ov) ov.pause(); p.classList.remove('playing'); }
+    });
+    v.play().catch(()=>{}); el.classList.add('playing');
+  } else {
+    v.pause(); el.classList.remove('playing');
+  }
 }
 
 /* ---------- HISTÓRICO (FAKE) DE COMPRAS — sobe a cada 5s ---------- */
