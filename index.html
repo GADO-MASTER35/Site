@@ -204,6 +204,19 @@
   .sale .s-sub{font-size:11px;color:var(--muted);margin-top:1px}
   @media(max-width:760px){ #salesFeed{left:8px;bottom:8px;max-width:66vw} .sale .s-top{font-size:11px} body.detail-open #salesFeed{display:none} }
 
+  /* ---------- botão flutuante do Grupo Vazadinhos (lateral, acompanha o scroll, sobe/desce) ---------- */
+  .tg-float{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:58;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    background:linear-gradient(120deg,#34a6e0,#229ED9);color:#fff;text-decoration:none;
+    padding:10px 10px;border-radius:16px;box-shadow:0 12px 30px rgba(34,158,217,.5);
+    font-size:10px;font-weight:800;letter-spacing:.02em;text-align:center;line-height:1.05;
+    animation:tgBob 2.6s ease-in-out infinite}
+  .tg-float svg{width:24px;height:24px}
+  .tg-float:active{transform:translateY(-50%) scale(.96)}
+  .tg-float:hover{filter:brightness(1.08)}
+  @keyframes tgBob{0%,100%{transform:translateY(-50%)}50%{transform:translateY(calc(-50% - 12px))}}
+  @media(max-width:760px){ .tg-float{right:8px;padding:8px 8px;font-size:9px} .tg-float svg{width:20px;height:20px} }
+
   footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px}
 
   /* barra fixa de ação no perfil (só mobile) */
@@ -482,6 +495,12 @@
   <!-- ================= HISTÓRICO (FAKE) DE COMPRAS ================= -->
   <div id="salesFeed" aria-hidden="true"></div>
 
+  <!-- ================= BOTÃO FLUTUANTE: GRUPO VAZADINHOS (lateral) ================= -->
+  <a id="tgFloat" class="tg-float" href="#" onclick="event.preventDefault();goVip(GRUPO_VAZADINHOS_CHECKOUT)" title="Entrar no Grupo Vazadinhos">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+    <span>Grupo<br>Vazadinhos</span>
+  </a>
+
   <!-- ================= RODAPÉ ================= -->
   <footer>
     <div class="wrap">
@@ -557,7 +576,7 @@ function enterSite(){
   document.body.classList.remove('locked');
   // marca a sessão para não pedir de novo nesta visita
   try { sessionStorage.setItem('age_ok','1'); } catch(e){}
-  startSales();   // começa o histórico de compras
+  setTimeout(startSales, 0);   // adia p/ depois do script carregar (evita TDZ na auto-entrada)
 }
 try { if(sessionStorage.getItem('age_ok')==='1'){ enterSite(); } } catch(e){}
 
@@ -634,6 +653,8 @@ async function loadCreators(){
    redireciona de volta para obrigado.html, que só então libera o
    Telegram após confirmar o pagamento (webhook). */
 let currentCreatorId = null;
+// link de pagamento do Grupo Vazadinhos (comunidade) usado pelo botão flutuante. Troque se mudar.
+const GRUPO_VAZADINHOS_CHECKOUT = "https://debitopay.com/l/pacote-vp-comunidade-w4iq";
 function goVip(url){
   if(!url || url === '#'){ return; }
   const ref = `${currentCreatorId||'x'}__vip__${Date.now().toString(36)}${Math.random().toString(36).slice(2,7)}`;
@@ -801,7 +822,8 @@ function showSale(){
   el.innerHTML=`<div class="s-top">🔥 <b>${nome}</b></div>`+
                `<div class="s-sub">comprou ${_pick(_salePlans)} · ${_pick(_saleCities)}</div>`;
   feed.appendChild(el);
-  requestAnimationFrame(()=>el.classList.add('show'));
+  void el.offsetWidth;            // força reflow p/ a transição rodar sempre
+  el.classList.add('show');
   while(feed.children.length>3) feed.removeChild(feed.firstChild);
   setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),450); }, 4300);
 }
