@@ -712,7 +712,9 @@ function renderPreviews(gallery){
 function scrollToPlans(){ const p=document.getElementById('d-plans'); if(p) p.scrollIntoView({behavior:'smooth',block:'center'}); }
 
 /* ---------- HISTÓRICO (FAKE) DE COMPRAS — sobe a cada 5s ---------- */
-const _saleNames=["Carlos M.","Adérito","Nelson","Hélio","Stélio","Júlio C.","Edson","Bruno","Rui P.","Délcio","Ivan","Paíto","Geraldo","Anselmo","Fábio","Quito","Mário","Tó Zé"];
+// nomes moçambicanos reais — combinados aleatoriamente (nome + sobrenome)
+const _saleFirst=["José","João","Carlos","António","Manuel","Fernando","Paulo","Armando","Eduardo","Hélder","Nelson","Adérito","Délcio","Stélio","Júlio","Edson","Rui","Ivan","Geraldo","Anselmo","Fábio","Mário","Sérgio","Hélio","Gildo","Custódio","Elias","Albano","Momade","Amade","Abdul","Selemane","Rachide","Issufo","Nordine","Aida","Lúcia","Telma","Stela","Inês","Gracinda","Benilde","Anabela","Esperança"];
+const _saleLast=["Mucavele","Cossa","Chissano","Macuácua","Tembe","Sitoe","Mondlane","Nhaca","Massingue","Langa","Matsinhe","Mahumane","Nhantumbo","Bila","Zandamela","Macamo","Ubisse","Muianga","Fumo","Chaúque","Cumbe","Manjate","Mabunda","Chivambo","Maluleque","Wamusse","Guambe","Banze","Machava","Tivane","Saíde","Abdula","Nhampossa"];
 const _saleCities=["Maputo","Matola","Beira","Nampula","Tete","Quelimane","Chimoio","Xai-Xai","Nacala","Pemba","Inhambane","Maxixe","Lichinga"];
 const _salePlans=["o Acesso completo","o VIP no Telegram"];
 function _pick(a){ return a[Math.floor(Math.random()*a.length)]; }
@@ -720,10 +722,10 @@ function showSale(){
   const feed=document.getElementById('salesFeed'); if(!feed) return;
   const gate=document.getElementById('ageGate');
   if(gate && getComputedStyle(gate).display!=='none') return;   // só depois do +18
-  const min=Math.floor(Math.random()*9)+1;
+  const nome = `${_pick(_saleFirst)} ${_pick(_saleLast)}`;
   const el=document.createElement('div'); el.className='sale';
-  el.innerHTML=`<div class="s-top">✅ <b>${_pick(_saleNames)}</b> de ${_pick(_saleCities)}</div>`+
-               `<div class="s-sub">assinou ${_pick(_salePlans)} · há ${min} min</div>`;
+  el.innerHTML=`<div class="s-top">🔥 <b>${nome}</b></div>`+
+               `<div class="s-sub">acabou de comprar ${_pick(_salePlans)} · ${_pick(_saleCities)}</div>`;
   feed.appendChild(el);
   requestAnimationFrame(()=>el.classList.add('show'));
   while(feed.children.length>3) feed.removeChild(feed.firstChild);
