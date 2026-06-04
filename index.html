@@ -153,6 +153,7 @@
   .plan h4{font-family:var(--display);font-weight:600;font-size:22px}
   .plan .price{font-family:var(--display);font-size:30px}
   .plan .price small{font-size:14px;color:var(--muted);font-family:var(--body)}
+  .plan .orig-mzn{font-size:11px;color:var(--muted);margin-top:-6px}
   .plan ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted);flex:1}
   .plan li{display:flex;gap:9px;align-items:flex-start}
   .plan li::before{content:"✓";color:var(--ok);font-weight:800}
@@ -585,6 +586,51 @@ function enterSite(){
 }
 try { if(sessionStorage.getItem('age_ok')==='1'){ enterSite(); } } catch(e){}
 
+/* ---------- Moeda local (pela localização do acesso) ----------
+   Mostra os preços aproximados na moeda do visitante (câmbio real).
+   A cobrança continua em MZN (gateway DebitoPay). */
+let CUR = { code:'MZN', rate:1, ready:false };
+function mznAmount(raw){ const n=parseInt(String(raw||'').replace(/\D/g,''),10); return isNaN(n)?null:n; }
+function fmtPrice(raw){
+  if(!CUR.ready) return raw;
+  const n=mznAmount(raw); if(n==null) return raw;
+  const local=Math.round(n*CUR.rate);
+  let s; try{ s=new Intl.NumberFormat(undefined,{style:'currency',currency:CUR.code,maximumFractionDigits:0}).format(local); }
+  catch(e){ s=local.toLocaleString('pt-BR')+' '+CUR.code; }
+  return '≈ '+s;
+}
+function reRenderPrices(){
+  renderGrid();
+  if(document.body.classList.contains('detail-open') && currentCreatorId) openCreator(currentCreatorId);
+}
+async function detectCurrency(){
+  // tenta vários serviços de geo-IP (com fallback) até achar a moeda
+  try{ const g=await fetch('https://ipwho.is/').then(r=>r.json()); if(g && g.success!==false && g.currency && g.currency.code) return g.currency.code; }catch(e){}
+  try{ const g=await fetch('https://ipapi.co/json/').then(r=>r.json()); if(g && g.currency) return g.currency; }catch(e){}
+  try{ const g=await fetch('https://get.geojs.io/v1/ip/country.json').then(r=>r.json()); if(g && g.country) return cc2cur(g.country); }catch(e){}
+  try{ const g=await fetch('https://api.country.is/').then(r=>r.json()); if(g && g.country) return cc2cur(g.country); }catch(e){}
+  return null;
+}
+function cc2cur(cc){
+  const m={MZ:'MZN',BR:'BRL',PT:'EUR',US:'USD',ZA:'ZAR',AO:'AOA',GB:'GBP',FR:'EUR',DE:'EUR',ES:'EUR',IT:'EUR',NL:'EUR',IE:'EUR',NG:'NGN',KE:'KES',IN:'INR',CN:'CNY',JP:'JPY',CA:'CAD',AU:'AUD',CH:'CHF',SE:'SEK',NO:'NOK',AE:'AED'};
+  return m[cc]||null;
+}
+async function initCurrency(){
+  // cache de 12h (evita refetch a cada visita)
+  try{ const c=JSON.parse(localStorage.getItem('studio_cur')||'null');
+    if(c && (Date.now()-c.at)<43200000 && c.code && c.code!=='MZN' && c.rate){ CUR={code:c.code,rate:c.rate,ready:true}; reRenderPrices(); } }catch(e){}
+  try{
+    const code=await detectCurrency();
+    if(!code || code==='MZN') return;                 // visitante em MZN (ou não detectou): sem conversão
+    const rr=await fetch('https://open.er-api.com/v6/latest/MZN').then(r=>r.json());
+    const rate=rr && rr.rates && rr.rates[code];
+    if(!rate) return;
+    CUR={code, rate, ready:true};
+    try{ localStorage.setItem('studio_cur', JSON.stringify({code, rate, at:Date.now()})); }catch(e){}
+    reRenderPrices();
+  }catch(e){ /* falhou: mantém MZN */ }
+}
+
 /* ---------- Render da vitrine ---------- */
 function renderGrid(){
   const grid = document.getElementById('creatorGrid');
@@ -604,7 +650,7 @@ function renderGrid(){
         <div class="bio">${c.bio}</div>
         <div class="meta"><span><b>${c.photos}</b> fotos</span><span><b>${c.videos}</b> vídeos</span><span class="subs">🔥 <b>${fakeSubs(c.id)}</b> assinantes</span></div>
         <div class="from">
-          <div class="price">a partir de <b>${c.fromPrice}</b></div>
+          <div class="price">a partir de <b>${fmtPrice(c.fromPrice)}</b></div>
           <div class="arrow">Ver perfil →</div>
         </div>
       </div>
@@ -759,7 +805,8 @@ function openCreator(id){
       ${p.best?'<div class="badge">Mais escolhido</div>':''}
       <div class="tier">${p.tier}</div>
       <h4>${p.name}</h4>
-      <div class="price">${p.price}<small>${p.per||''}</small></div>
+      <div class="price">${fmtPrice(p.price)}<small>${p.per||''}</small></div>
+      ${CUR.ready && mznAmount(p.price)!=null ? `<div class="orig-mzn">${p.price} · cobrança em MZN</div>` : ''}
       <ul>${p.perks.map(k=>`<li>${k}</li>`).join('')}</ul>
       ${p.telegram
         ? `<a class="btn btn-tg" href="${p.checkoutUrl}" onclick="event.preventDefault();goVip('${p.checkoutUrl}')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>Pagar e entrar no Grupo Vazadinhos</a>`
@@ -901,6 +948,7 @@ document.addEventListener('keydown', (e)=>{
 });
 
 loadCreators();
+initCurrency();   // detecta a moeda local pela localização do acesso
 </script>
 </body>
 </html>
