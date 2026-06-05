@@ -128,7 +128,6 @@
     <input type="password" id="authPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAuth()" />
     <div style="height:16px"></div>
     <button class="btn btn-primary" id="authBtn" onclick="doAuth()">Entrar</button>
-    <button class="btn btn-ghost hidden" id="demoBtn" style="width:100%;margin-top:10px" onclick="enterDemo()">👀 Ver painel em modo demonstração</button>
     <p class="muted-small">Acesso exclusivo do administrador. · <a class="link" href="index.html">voltar ao site</a></p>
   </div>
 </div>
@@ -139,7 +138,6 @@
     <div class="logo">Studio<span>.</span></div>
     <div class="who">Admin: <b id="userEmail"></b> · <a class="link" href="index.html">ver site</a> · <button class="link" onclick="signOut()">sair</button></div>
   </header>
-  <div id="demoBanner" class="setup hidden">Você está no <b>modo demonstração</b> — pode explorar tudo, mas <b>nada é salvo</b>. Conecte o Supabase para usar de verdade.</div>
 
   <!-- ---------- LISTA DE CRIADORAS ---------- -->
   <div id="listView">
@@ -315,7 +313,6 @@ let editing = false;      // true = editando existente, false = nova
 let gallery = [];
 let avatarUrl = "";
 let schedule = [];
-let DEMO = false;         // modo demonstração (sem Supabase, nada é salvo)
 
 /* ---------- util ---------- */
 function $(id){ return document.getElementById(id); }
@@ -325,7 +322,6 @@ function toast(msg, isErr){
   setTimeout(()=>t.className='toast',2800);
 }
 function needSetup(){
-  if(DEMO) return false;   // no modo demo nada precisa de Supabase
   if(!sb){ toast('Configure o Supabase em supabase-config.js primeiro.',true); return true; }
   return false;
 }
@@ -385,10 +381,6 @@ async function uploadFile(file, onProgress){
   if(file.size > MAX_BYTES){
     toast(`"${file.name}" tem ${(file.size/1048576).toFixed(0)} MB — o limite é 100 MB.`, true);
     return null;
-  }
-  if(DEMO){   // demo: mostra a prévia local, sem enviar pro servidor
-    if(onProgress){ onProgress(0.5); await new Promise(r=>setTimeout(r,150)); onProgress(1); }
-    return URL.createObjectURL(file);
   }
   const { data:{ session } } = await sb.auth.getSession();
   if(!session){ toast('Sua sessão expirou. Entre de novo.', true); return null; }
@@ -563,7 +555,6 @@ function renderSchedule(){
 
 /* ---------- LISTA DE CRIADORAS ---------- */
 async function loadCreators(){
-  if(DEMO){ renderList(); return; }
   if(needSetup()) return;
   const { data, error } = await sb.from('creators').select('*')
     .order('sort_order',{ascending:true}).order('updated_at',{ascending:false});
@@ -604,7 +595,6 @@ async function toggleApprove(id){
   if(!c.approved && !(c.confirmed_age && c.confirmed_ownership && c.confirmed_removal)){
     toast('Para publicar, abra e marque as três confirmações.',true); return;
   }
-  if(DEMO){ c.approved=!c.approved; toast(c.approved?'Publicada (demo)':'Despublicada (demo)'); renderList(); return; }
   const { error } = await sb.from('creators').update({approved:!c.approved, updated_at:new Date().toISOString()}).eq('id',id);
   if(error){ toast(error.message,true); return; }
   toast(c.approved?'Despublicada.':'Publicada na vitrine!');
@@ -614,7 +604,6 @@ async function toggleApprove(id){
 async function deleteCreator(id){
   const c = creators.find(x=>String(x.id)===String(id)); if(!c) return;
   if(!confirm(`Excluir "${c.name||'esta criadora'}" definitivamente? Esta ação não pode ser desfeita.`)) return;
-  if(DEMO){ creators = creators.filter(x=>String(x.id)!==String(id)); toast('Excluída (demo).'); renderList(); return; }
   const { error } = await sb.from('creators').delete().eq('id',id);
   if(error){ toast(error.message,true); return; }
   toast('Criadora excluída.');
@@ -750,11 +739,6 @@ async function saveProfile(){
     approved:wantPublish,
     updated_at:new Date().toISOString()
   };
-  if(DEMO){
-    demoUpsert(payload);
-    toast((editing?'Atualizada':'Cadastrada')+' (demo — não persiste).');
-    renderList(); closeEditor(); return;
-  }
   const { error } = await sb.from('creators').upsert(payload);
   if(error){ toast(error.message,true); return; }
   toast(editing?'Criadora atualizada!':'Criadora cadastrada!');
@@ -770,35 +754,8 @@ async function onLogin(user){
   showList();
   await loadCreators();
 }
-/* ---------- MODO DEMONSTRAÇÃO (sem Supabase, nada é salvo) ---------- */
-function demoUpsert(p){
-  const i=creators.findIndex(c=>String(c.id)===String(p.id));
-  if(i>=0) creators[i]={...creators[i],...p}; else creators.push(p);
-}
-function enterDemo(){
-  DEMO=true;
-  $('userEmail').textContent=(typeof ADMIN_EMAIL!=='undefined'?ADMIN_EMAIL:'admin')+' · DEMO';
-  $('auth').classList.add('hidden');
-  $('app').classList.remove('hidden');
-  $('demoBanner').classList.remove('hidden');
-  creators=[
-    { id:'demo-biby', name:'Biby', handle:'@biby', bio:'Conteúdo autoral exclusivo, toda semana.',
-      description:'Acesso à galeria completa e ao GRUPO VAZADINHOS TELEGRAM, com novidades em primeira mão.',
-      photos_count:'120', videos_count:'40', is_live:true, avatar_url:'', gallery:[], schedule:[],
-      access_price:'297 MZN', checkout_access:'https://debitopay.com/l/ativacao-standard-biby-f4y5',
-      vip_price:'497 MZN', checkout_vip:'https://debitopay.com/l/pacote-vp-comunidade-w4iq', telegram_link:'',
-      confirmed_age:true, confirmed_ownership:true, confirmed_removal:true, approved:true, updated_at:new Date().toISOString() },
-    { id:'demo-2', name:'Exemplo (rascunho)', handle:'@exemplo', bio:'Perfil de exemplo não publicado.',
-      description:'', photos_count:'', videos_count:'', is_live:false, avatar_url:'', gallery:[], schedule:[],
-      access_price:'', checkout_access:'', vip_price:'', checkout_vip:'', telegram_link:'',
-      confirmed_age:false, confirmed_ownership:false, confirmed_removal:false, approved:false, updated_at:new Date().toISOString() }
-  ];
-  showList(); renderList();
-  toast('Modo demonstração — nada é salvo de verdade.');
-}
-
 (async function init(){
-  if(!sb){ $('auth').classList.remove('hidden'); $('demoBtn').classList.remove('hidden'); return; }
+  if(!sb){ $('auth').classList.remove('hidden'); return; }
   const { data } = await sb.auth.getSession();
   if(data.session){ onLogin(data.session.user); }
   else { $('auth').classList.remove('hidden'); }

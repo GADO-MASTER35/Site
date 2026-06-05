@@ -6,6 +6,8 @@
 <title>Studio · Conteúdo Exclusivo +18</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://kvimdatdijavpjvfzjxx.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -362,13 +364,11 @@
   <!-- ================= AMBIENTE: SILHUETA + FUMAÇA + LUZES VERMELHAS ================= -->
   <div class="ambient" aria-hidden="true">
     <!-- silhueta de mulher dançando, em loop (licença livre Pexels) -->
-    <video class="dancer-video" autoplay muted loop playsinline preload="auto">
+    <video class="dancer-video" autoplay muted loop playsinline preload="metadata">
       <source src="media/bg-dance.mp4" type="video/mp4">
     </video>
-    <!-- fumaça por cima (screen) — só desktop -->
-    <video class="smoke-video" autoplay muted loop playsinline preload="auto">
-      <source src="media/smoke.mp4" type="video/mp4">
-    </video>
+    <!-- fumaça por cima (screen) — só desktop, carregada DEPOIS (é pesada) -->
+    <video class="smoke-video" muted loop playsinline preload="none" data-src="media/smoke.mp4"></video>
     <div class="fog"></div>
     <div class="stage-tint"></div>
     <div class="red-wash"></div>
@@ -393,6 +393,16 @@
     }
     speed('.dancer-video',0.5);   // dançarina mais devagar
     speed('.smoke-video',0.6);    // fumaça mais devagar
+    // carrega a fumaça (14 MB) só depois do site pronto, e só no desktop
+    window.addEventListener('load', function(){
+      if(window.matchMedia('(min-width:761px)').matches){
+        var sv=document.querySelector('.smoke-video');
+        if(sv && sv.dataset.src && !sv.getAttribute('src')){
+          sv.src=sv.dataset.src; try{ sv.load(); }catch(e){}
+          var p=sv.play(); if(p&&p.catch) p.catch(function(){});
+        }
+      }
+    });
   })();
   </script>
 
@@ -965,7 +975,7 @@ document.addEventListener('keydown', (e)=>{
 });
 
 loadCreators();
-initCurrency();   // detecta a moeda local pela localização do acesso
+setTimeout(initCurrency, 700);   // moeda local: depois, pra não competir com o carregamento inicial
 </script>
 </body>
 </html>
