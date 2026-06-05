@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Área da Criadora · Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0b10;--card:#1d181f;--line:#2c252e;--ink:#f3eef2;--muted:#a99caa;
+    --accent:#e0567f;--ok:#5fd09a;--tg:#229ED9;--warn:#e0a23f;
+    --display:'Fraunces',Georgia,serif;--body:'Manrope',system-ui,sans-serif;--radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 18px 90px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 26px;border-bottom:1px solid var(--line);margin-bottom:26px}
+  .logo{font-family:var(--display);font-size:22px;font-weight:600}
+  .logo span{color:var(--accent)}
+  .who{font-size:13px;color:var(--muted)}.who b{color:var(--ink)}
+  .link{background:none;border:none;color:var(--muted);font-family:var(--body);font-size:13px;cursor:pointer;text-decoration:underline}
+  h1{font-family:var(--display);font-weight:600;font-size:28px;margin-bottom:6px}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:24px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+  .card h2{font-family:var(--display);font-weight:600;font-size:19px;margin-bottom:4px}
+  .card .hint{color:var(--muted);font-size:13px;margin-bottom:16px}
+  label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+  input[type=text],input[type=email],input[type=password],input[type=tel],input[type=url],textarea,select{
+    width:100%;background:#15111780;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:12px 13px;font-family:var(--body);font-size:15px}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  textarea{resize:vertical;min-height:80px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:560px){.row{grid-template-columns:1fr}}
+  .btn{font-family:var(--body);font-weight:700;font-size:15px;border:none;border-radius:11px;padding:14px 20px;cursor:pointer;transition:filter .2s,transform .12s}
+  .btn:active{transform:scale(.99)}
+  .btn-primary{background:linear-gradient(120deg,var(--accent),#b8456a);color:#fff;width:100%}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}.btn-ghost:hover{color:var(--ink)}
+  .btn-sm{padding:9px 13px;font-size:13px;border-radius:9px}
+  .btn-danger{background:transparent;border:1px solid #5e2733;color:#e0768a}
+  .check{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);margin:12px 0}
+  .check input{margin-top:3px;width:16px;height:16px;flex:none}.check b{color:var(--ink)}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ok);color:#06281b;font-weight:700;padding:13px 22px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:99}
+  .toast.show{opacity:1}.toast.err{background:var(--accent);color:#fff}
+  .switch{display:flex;align-items:center;gap:10px;font-size:14px}
+  #auth{max-width:430px;margin:6vh auto 0}
+  .tabs{display:flex;gap:8px;margin-bottom:16px}
+  .tab{flex:1;padding:11px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:10px;cursor:pointer;font-weight:700;font-family:var(--body)}
+  .tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .muted-small{font-size:12px;color:var(--muted);margin-top:14px;text-align:center}
+  .avatar-prev{width:96px;height:96px;border-radius:14px;object-fit:cover;border:1px solid var(--line)}
+  .thumbs{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+  .thumb{width:84px;height:104px;border-radius:10px;object-fit:cover;border:1px solid var(--line)}
+  .thumb-wrap{position:relative;cursor:grab}.thumb-wrap.dragging{opacity:.35}.thumb-wrap.over{outline:2px dashed var(--accent);outline-offset:2px;border-radius:10px}
+  .thumb-badge{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;font-weight:800;padding:2px 5px;border-radius:5px}
+  video.thumb{background:#000}
+  .thumb-x{position:absolute;top:-8px;right:-8px;background:var(--accent);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-weight:700;font-size:13px;z-index:3}
+  .thumb-lock{position:absolute;top:-8px;left:-8px;border:none;border-radius:8px;width:26px;height:24px;cursor:pointer;font-size:12px;z-index:3;padding:0}
+  .thumb-lock.free{background:var(--ok)}.thumb-lock.locked{background:#5e2733}
+  .thumb-move{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;padding:3px}
+  .thumb-move button{background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:6px;width:24px;height:22px;cursor:pointer;font-size:15px}
+  .thumb-move button:disabled{opacity:.3}
+  .up{margin:14px 0 2px}.up-bar{height:9px;background:#2c252e;border-radius:99px;overflow:hidden}
+  .up-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#b8456a);transition:width .12s}
+  .up-txt{font-size:12px;color:var(--muted);margin-top:6px}
+  .link-actions{display:flex;gap:8px;margin-top:7px}
+  .stat-box{display:flex;gap:24px;flex-wrap:wrap}
+  .stat-box .b{font-family:var(--display);font-size:26px;color:var(--ink)}
+  .stat-box .l{font-size:12px;color:var(--muted)}
+  .pending{background:#2a1f12;border:1px solid var(--warn);border-radius:12px;padding:16px;color:#e8d3a8;font-size:14px;line-height:1.5}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN / CADASTRO ===================== -->
+<div id="auth" class="wrap hidden">
+  <div class="logo" style="text-align:center;margin-bottom:18px">Studio<span>.</span></div>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab on" id="tabLogin" onclick="switchTab('login')">Entrar</button>
+      <button class="tab" id="tabSignup" onclick="switchTab('signup')">Criar conta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginBox">
+      <label>E-mail</label><input type="email" id="lEmail" placeholder="seu@email.com" />
+      <label>Senha</label><input type="password" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      <div style="height:16px"></div>
+      <button class="btn btn-primary" id="lBtn" onclick="doLogin()">Entrar</button>
+    </div>
+
+    <!-- CADASTRO -->
+    <div id="signupBox" class="hidden">
+      <p class="hint">Crie sua conta. Você envia um documento e, após nossa verificação, liberamos seu acesso.</p>
+      <label>Nome artístico</label><input type="text" id="sName" placeholder="Ex: Bia" />
+      <label>E-mail</label><input type="email" id="sEmail" placeholder="seu@email.com" />
+      <label>Telefone (com DDD/país)</label><input type="tel" id="sPhone" inputmode="numeric" placeholder="Ex: 84 000 0000" />
+      <label>Senha</label><input type="password" id="sPass" placeholder="mín. 6 caracteres" />
+      <label>Documento de identidade (foto, frente)</label>
+      <input type="file" id="sDoc" accept="image/*" />
+      <label class="check" style="margin-top:14px"><input type="checkbox" id="sAge"> <span>Confirmo que tenho <b>18 anos ou mais</b> e que o conteúdo é <b>meu e autoral</b>.</span></label>
+      <button class="btn btn-primary" id="sBtn" onclick="doSignup()">Criar conta e enviar para verificação</button>
+    </div>
+    <p class="muted-small"><a class="link" href="index.html">← voltar ao site</a></p>
+  </div>
+</div>
+
+<!-- ===================== APP (logada) ===================== -->
+<div id="app" class="wrap hidden">
+  <header>
+    <div class="logo">Studio<span>.</span></div>
+    <div class="who">Criadora: <b id="meEmail"></b> · <button class="link" onclick="signOut()">sair</button></div>
+  </header>
+
+  <!-- aguardando aprovação -->
+  <div id="pendingView" class="hidden">
+    <h1>Conta em análise ⏳</h1>
+    <p class="sub">Recebemos seu cadastro e seu documento. Assim que verificarmos, liberamos seu acesso (pelo seu telefone). Volte aqui mais tarde.</p>
+    <div class="pending">Status: <b>aguardando aprovação</b>. Qualquer dúvida, fale com a agência.</div>
+  </div>
+
+  <!-- editor da própria vitrine -->
+  <div id="editorView" class="hidden">
+    <h1>Meu perfil</h1>
+    <p class="sub">Tudo que você salvar aqui aparece na sua vitrine. Você controla suas fotos, prévias e valores.</p>
+
+    <!-- vendas -->
+    <div class="card">
+      <h2>Minhas vendas</h2>
+      <p class="hint">Resumo do que você já vendeu.</p>
+      <div class="stat-box">
+        <div><div class="b" id="salesTotal">—</div><div class="l">Total vendido</div></div>
+        <div><div class="b" id="salesCount">—</div><div class="l">Vendas</div></div>
+      </div>
+    </div>
+
+    <!-- perfil -->
+    <div class="card">
+      <h2>Informações do perfil</h2>
+      <div class="row">
+        <div><label>Nome artístico</label><input type="text" id="f_name" placeholder="Ex: Bia" /></div>
+        <div><label>@usuário</label><input type="text" id="f_handle" placeholder="@bia" /></div>
+      </div>
+      <label>Bio curta (aparece no card)</label><input type="text" id="f_bio" placeholder="Uma frase sobre você" />
+      <label>Descrição completa (aparece no seu perfil)</label>
+      <textarea id="f_desc" placeholder="O que você publica, com que frequência, o que o assinante recebe."></textarea>
+      <div class="row">
+        <div><label>Nº de fotos</label><input type="text" id="f_photos" placeholder="120" /></div>
+        <div><label>Nº de vídeos</label><input type="text" id="f_videos" placeholder="40" /></div>
+      </div>
+      <label class="switch" style="margin-top:16px"><input type="checkbox" id="f_live" style="width:16px;height:16px"> Mostrar "Online agora" no card</label>
+    </div>
+
+    <!-- fotos -->
+    <div class="card">
+      <h2>Foto de perfil</h2>
+      <img id="avatarPrev" class="avatar-prev hidden" alt="" />
+      <div style="height:10px"></div>
+      <input type="file" id="avatarFile" accept="image/*" onchange="uploadAvatar(event)" />
+
+      <h2 style="margin-top:24px">Prévias da galeria</h2>
+      <p class="hint">Fotos ou vídeos · até 100&nbsp;MB cada · 🔓 = prévia grátis, 🔒 = bloqueado (só quem paga vê) · arraste para reordenar.</p>
+      <input type="file" id="galleryFile" accept="image/*,video/*" multiple onchange="uploadGallery(event)" />
+      <div class="hint" id="galCount" style="margin-top:8px"></div>
+      <div class="thumbs" id="galleryThumbs"></div>
+      <div id="upWrap" class="up hidden"><div class="up-bar"><i id="upBar"></i></div><div class="up-txt" id="upTxt"></div></div>
+    </div>
+
+    <!-- valores -->
+    <div class="card">
+      <h2>Valores e links</h2>
+      <p class="hint">Preços e os links de pagamento do gateway.</p>
+      <div class="row">
+        <div><label>Preço do acesso completo</label><input type="text" id="f_priceAccess" placeholder="297 MZN" /></div>
+        <div><label>Link de pagamento (acesso)</label><input type="url" id="f_linkAccess" placeholder="https://debitopay.com/l/..." /></div>
+      </div>
+      <div class="row">
+        <div><label>Preço do Grupo Vazadinhos (Telegram)</label><input type="text" id="f_priceVip" placeholder="497 MZN" /></div>
+        <div><label>Link de pagamento (Grupo Vazadinhos)</label><input type="url" id="f_linkVip" placeholder="https://debitopay.com/l/..." /></div>
+      </div>
+      <label>Link do grupo/canal do Telegram (entregue após o pagamento)</label>
+      <input type="url" id="f_telegram" placeholder="https://t.me/+..." />
+    </div>
+
+    <div class="card">
+      <h2>Publicar</h2>
+      <label class="switch"><input type="checkbox" id="f_approved" style="width:18px;height:18px"> <b>Publicar na vitrine</b> (visível para o público)</label>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveProfile()">Salvar meu perfil</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+/* ===================== ÁREA DA CRIADORA ===================== */
+let me=null, myCreator=null;
+let gallery=[], avatarUrl='', schedule=[];
+const MAX_GALLERY=50, MAX_BYTES=100*1024*1024;
+function $(id){ return document.getElementById(id); }
+function toast(m,e){ const t=$('toast'); t.textContent=m; t.className='toast show'+(e?' err':''); setTimeout(()=>t.className='toast',2800); }
+function need(){ if(!sb){ toast('Site não conectado ao Supabase.',true); return true; } return false; }
+function switchTab(w){
+  $('tabLogin').classList.toggle('on', w==='login'); $('tabSignup').classList.toggle('on', w==='signup');
+  $('loginBox').classList.toggle('hidden', w!=='login'); $('signupBox').classList.toggle('hidden', w!=='signup');
+}
+
+/* ---------- AUTH ---------- */
+async function doLogin(){
+  if(need()) return;
+  const email=$('lEmail').value.trim().toLowerCase(), pass=$('lPass').value;
+  if(!email||!pass){ toast('Preencha e-mail e senha.',true); return; }
+  $('lBtn').disabled=true;
+  const r=await sb.auth.signInWithPassword({email,password:pass}); $('lBtn').disabled=false;
+  if(r.error){ toast(r.error.message,true); return; }
+  onLogin(r.data.user);
+}
+async function doSignup(){
+  if(need()) return;
+  const name=$('sName').value.trim(), email=$('sEmail').value.trim().toLowerCase();
+  const phone=$('sPhone').value.replace(/\D/g,''), pass=$('sPass').value, doc=$('sDoc').files[0];
+  if(!name||!email||!pass){ toast('Preencha nome, e-mail e senha.',true); return; }
+  if(phone.length<9){ toast('Informe um telefone válido.',true); return; }
+  if(pass.length<6){ toast('A senha precisa de ao menos 6 caracteres.',true); return; }
+  if(!doc){ toast('Envie a foto do seu documento.',true); return; }
+  if(!$('sAge').checked){ toast('Você precisa confirmar 18+ e autoria.',true); return; }
+  $('sBtn').disabled=true; toast('Criando conta...');
+  const r=await sb.auth.signUp({email,password:pass});
+  if(r.error){ $('sBtn').disabled=false; toast(r.error.message,true); return; }
+  const user=r.data.user, session=r.data.session;
+  if(!session){ $('sBtn').disabled=false; toast('Confirme seu e-mail e depois entre. (Ou peça pra agência desativar a confirmação por e-mail.)',true); return; }
+  // sobe o documento (bucket privado)
+  toast('Enviando documento...');
+  const docPath=`${user.id}/doc-${Date.now()}-${doc.name.replace(/[^a-z0-9.\-_]/gi,'_')}`;
+  const up=await sb.storage.from('model-docs').upload(docPath, doc, {upsert:true});
+  if(up.error){ $('sBtn').disabled=false; toast('Erro ao enviar documento: '+up.error.message,true); return; }
+  // cria a vitrine dela (pendente)
+  const ins=await sb.from('creators').insert({ owner:user.id, name, phone, doc_url:docPath, confirmed_age:true, account_status:'pending', approved:false });
+  $('sBtn').disabled=false;
+  if(ins.error){ toast(ins.error.message,true); return; }
+  toast('Conta criada! Aguarde a aprovação.');
+  onLogin(user);
+}
+async function signOut(){ await sb.auth.signOut(); location.reload(); }
+
+/* ---------- CARREGAR ---------- */
+async function onLogin(user){
+  me=user; $('meEmail').textContent=user.email;
+  $('auth').classList.add('hidden'); $('app').classList.remove('hidden');
+  const { data } = await sb.from('creators').select('*').eq('owner', user.id).maybeSingle();
+  myCreator=data;
+  if(!myCreator || myCreator.account_status!=='approved'){
+    $('editorView').classList.add('hidden'); $('pendingView').classList.remove('hidden');
+    return;
+  }
+  $('pendingView').classList.add('hidden'); $('editorView').classList.remove('hidden');
+  fillEditor(myCreator); loadSales();
+}
+function fillEditor(d){
+  f_name.value=d.name||''; f_handle.value=d.handle||''; f_bio.value=d.bio||''; f_desc.value=d.description||'';
+  f_photos.value=d.photos_count||''; f_videos.value=d.videos_count||''; f_live.checked=!!d.is_live;
+  f_priceAccess.value=d.access_price||''; f_linkAccess.value=d.checkout_access||'';
+  f_priceVip.value=d.vip_price||''; f_linkVip.value=d.checkout_vip||''; f_telegram.value=d.telegram_link||'';
+  f_approved.checked=!!d.approved;
+  avatarUrl=d.avatar_url||''; if(avatarUrl){ const i=$('avatarPrev'); i.src=avatarUrl; i.classList.remove('hidden'); }
+  gallery=(Array.isArray(d.gallery)?d.gallery:[]).map((it,i)=> (it&&typeof it==='object')?{url:it.url,free:!!it.free}:{url:it,free:i<5});
+  renderGallery();
+}
+async function loadSales(){
+  const { data } = await sb.from('payments').select('amount').eq('creator_id', myCreator.id).eq('status','completed');
+  const rows=data||[]; const total=rows.reduce((s,r)=>s+(Number(r.amount)||0),0);
+  $('salesCount').textContent=rows.length;
+  $('salesTotal').textContent = total ? (total.toLocaleString('pt-BR')+' MZN') : (rows.length+' venda(s)');
+}
+
+/* ---------- UPLOAD (na pasta da modelo = uid) ---------- */
+async function uploadFile(file, onProgress){
+  if(file.size>MAX_BYTES){ toast(`"${file.name}" passa de 100 MB.`,true); return null; }
+  const { data:{session} } = await sb.auth.getSession();
+  if(!session){ toast('Sessão expirou, entre de novo.',true); return null; }
+  const path=`${me.id}/${Date.now()}-${file.name.replace(/[^a-z0-9.\-_]/gi,'_')}`;
+  const url=`${SUPABASE_URL}/storage/v1/object/creator-media/${path}`;
+  return await new Promise(res=>{
+    const x=new XMLHttpRequest(); x.open('POST',url,true);
+    x.setRequestHeader('authorization',`Bearer ${session.access_token}`); x.setRequestHeader('apikey',SUPABASE_ANON_KEY);
+    x.setRequestHeader('x-upsert','true'); if(file.type) x.setRequestHeader('content-type',file.type);
+    x.upload.onprogress=e=>{ if(e.lengthComputable&&onProgress) onProgress(e.loaded/e.total); };
+    x.onload=()=>{ if(x.status>=200&&x.status<300){ const {data}=sb.storage.from('creator-media').getPublicUrl(path); res(data.publicUrl); } else { let m='falha'; try{m=JSON.parse(x.responseText).message||m;}catch(_){} toast('Erro: '+m,true); res(null); } };
+    x.onerror=()=>{ toast('Erro de rede no upload.',true); res(null); };
+    x.send(file);
+  });
+}
+function showProgress(t){ $('upWrap').classList.remove('hidden'); $('upBar').style.width='0%'; $('upTxt').textContent=t||'Enviando…'; }
+function setProgress(p){ $('upBar').style.width=Math.round(p*100)+'%'; }
+function hideProgress(){ $('upWrap').classList.add('hidden'); }
+async function deleteFromStorage(url){ try{ if(!sb||!url) return; const m='/creator-media/'; const i=url.indexOf(m); if(i<0) return; const p=decodeURIComponent(url.slice(i+m.length).split('?')[0]); await sb.storage.from('creator-media').remove([p]); }catch(e){} }
+async function uploadAvatar(e){ const f=e.target.files[0]; if(!f) return; const old=avatarUrl; showProgress('Enviando foto…'); const u=await uploadFile(f,setProgress); hideProgress(); e.target.value=''; if(!u) return; avatarUrl=u; const i=$('avatarPrev'); i.src=u; i.classList.remove('hidden'); if(old&&old!==u) deleteFromStorage(old); toast('Foto enviada.'); }
+async function uploadGallery(e){
+  let files=[...e.target.files]; if(!files.length) return;
+  const free=MAX_GALLERY-gallery.length;
+  if(free<=0){ e.target.value=''; toast(`Limite de ${MAX_GALLERY}. Remova alguma.`,true); return; }
+  if(files.length>free){ toast(`Só cabem mais ${free}.`,true); files=files.slice(0,free); }
+  let ok=0,n=0;
+  for(const f of files){ n++; showProgress(`Enviando ${n}/${files.length}: ${f.name}`); const u=await uploadFile(f,setProgress); if(u){ gallery.push({url:u,free:true}); ok++; renderGallery(); } }
+  hideProgress(); e.target.value=''; toast(ok?`${ok} enviado(s) · ${gallery.length}/${MAX_GALLERY}`:'Nada enviado.',!ok);
+}
+
+/* ---------- GALERIA (com 🔓/🔒) ---------- */
+function isVideo(u){ return /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u||''); }
+function gURL(it){ return (it&&typeof it==='object')?it.url:it; }
+function gFREE(it,i){ return (it&&typeof it==='object')?!!it.free:(i<5); }
+function renderGallery(){
+  $('galleryThumbs').innerHTML = gallery.map((it,i)=>{
+    const u=gURL(it), free=gFREE(it,i);
+    const media=isVideo(u)?`<video class="thumb" src="${u}" muted playsinline preload="metadata"></video><span class="thumb-badge">VÍDEO</span>`:`<img class="thumb" src="${u}" alt="">`;
+    return `<div class="thumb-wrap" draggable="true" ondragstart="gDS(event,${i})" ondragover="gDO(event,${i})" ondragleave="gDL(event)" ondrop="gDR(event,${i})" ondragend="gDE(event)">
+      ${media}
+      <button class="thumb-lock ${free?'free':'locked'}" title="${free?'Prévia grátis — clique p/ BLOQUEAR':'Bloqueado — clique p/ liberar'}" onclick="toggleFree(${i})">${free?'🔓':'🔒'}</button>
+      <button class="thumb-x" title="remover" onclick="rmGallery(${i})">×</button>
+      <div class="thumb-move"><button onclick="mvGallery(${i},-1)" ${i===0?'disabled':''}>‹</button><button onclick="mvGallery(${i},1)" ${i===gallery.length-1?'disabled':''}>›</button></div>
+    </div>`;
+  }).join('');
+  const livres=gallery.filter((it,i)=>gFREE(it,i)).length;
+  $('galCount').textContent=`${gallery.length} de ${MAX_GALLERY} · ${livres} grátis, ${gallery.length-livres} bloqueada(s)`;
+  $('galleryFile').disabled=gallery.length>=MAX_GALLERY;
+}
+function toggleFree(i){ if(!gallery[i]) return; if(typeof gallery[i]!=='object') gallery[i]={url:gallery[i],free:(i<5)}; gallery[i].free=!gallery[i].free; renderGallery(); }
+function mvGallery(i,d){ const j=i+d; if(j<0||j>=gallery.length) return; const t=gallery[i]; gallery[i]=gallery[j]; gallery[j]=t; renderGallery(); }
+async function rmGallery(i){ const u=gURL(gallery[i]); gallery.splice(i,1); renderGallery(); await deleteFromStorage(u); }
+let _df=null;
+function gDS(e,i){ _df=i; e.currentTarget.classList.add('dragging'); try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(i));}catch(_){} }
+function gDO(e,i){ e.preventDefault(); if(_df!==null&&_df!==i) e.currentTarget.classList.add('over'); }
+function gDL(e){ e.currentTarget.classList.remove('over'); }
+function gDR(e,i){ e.preventDefault(); const from=_df!==null?_df:parseInt((e.dataTransfer&&e.dataTransfer.getData('text/plain'))||'-1',10); _df=null; if(from<0||from===i||from>=gallery.length){ renderGallery(); return; } const it=gallery.splice(from,1)[0]; gallery.splice(i,0,it); renderGallery(); }
+function gDE(){ _df=null; document.querySelectorAll('.thumb-wrap.dragging,.thumb-wrap.over').forEach(el=>el.classList.remove('dragging','over')); }
+
+/* ---------- SALVAR ---------- */
+async function saveProfile(){
+  if(need()||!myCreator) return;
+  if(!f_name.value.trim()){ toast('Dê um nome ao seu perfil.',true); return; }
+  const payload={
+    id: myCreator.id, owner: me.id,
+    name:f_name.value.trim(), handle:f_handle.value.trim(), bio:f_bio.value.trim(), description:f_desc.value.trim(),
+    photos_count:f_photos.value.trim(), videos_count:f_videos.value.trim(), is_live:f_live.checked,
+    avatar_url:avatarUrl, gallery:gallery,
+    access_price:f_priceAccess.value.trim(), checkout_access:f_linkAccess.value.trim(),
+    vip_price:f_priceVip.value.trim(), checkout_vip:f_linkVip.value.trim(), telegram_link:f_telegram.value.trim(),
+    approved:f_approved.checked, confirmed_age:true
+  };
+  const { error } = await sb.from('creators').upsert(payload);
+  if(error){ toast(error.message,true); return; }
+  toast('Perfil salvo!');
+  const { data } = await sb.from('creators').select('*').eq('owner',me.id).maybeSingle(); myCreator=data||myCreator;
+  if(myCreator && myCreator.approved===false && f_approved.checked){ toast('Salvo. (A publicação só vale depois da conta aprovada.)'); }
+}
+
+/* ---------- INICIAR ---------- */
+(async function init(){
+  if(!sb){ $('auth').classList.remove('hidden'); return; }
+  const { data } = await sb.auth.getSession();
+  if(data.session){ onLogin(data.session.user); } else { $('auth').classList.remove('hidden'); }
+})();
+</script>
+</body>
+</html>

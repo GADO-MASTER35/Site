@@ -148,6 +148,7 @@
     <div class="toolbar">
       <span class="count" id="listCount"></span>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost" style="width:auto" onclick="showModels()">✅ Aprovar modelo</button>
         <button class="btn btn-ghost" style="width:auto" onclick="showClients()">👤 Liberar cliente</button>
         <button class="btn btn-primary" style="width:auto" onclick="newCreator()">+ Nova criadora</button>
       </div>
@@ -279,6 +280,21 @@
       <div id="cliResult" style="margin-top:16px;font-size:14px;color:var(--muted);line-height:1.6"></div>
     </div>
     <p class="hint">Dica: "Verificar" mostra os pagamentos que o webhook registrou para esse número. "Liberar acesso" cria a liberação manualmente (use quando o pagamento não entrou sozinho). Depois, o cliente entra pelo "Já é cliente?" no site com o mesmo número.</p>
+  </div>
+
+  <!-- ---------- APROVAR MODELO POR TELEFONE ---------- -->
+  <div id="modelsView" class="hidden">
+    <div class="editor-head"><button class="back" onclick="showList()">← Voltar à lista</button></div>
+    <h1>Aprovar modelo</h1>
+    <p class="sub">A modelo cria conta e envia o documento na página dela. Aqui você confere o documento e aprova pelo telefone que ela cadastrou.</p>
+    <div class="card">
+      <label>Telefone da modelo (o que ela cadastrou)</label>
+      <input type="tel" id="mPhone" inputmode="numeric" placeholder="Ex: 84 000 0000" />
+      <div style="margin-top:16px">
+        <button class="btn btn-ghost" style="width:auto" onclick="buscarModelo()">Buscar</button>
+      </div>
+      <div id="mResult" style="margin-top:16px;font-size:14px;color:var(--muted);line-height:1.6"></div>
+    </div>
   </div>
 </div>
 
@@ -606,14 +622,47 @@ async function deleteCreator(id){
 }
 
 /* ---------- EDITOR (abrir/fechar) ---------- */
-function showList(){ $('listView').classList.remove('hidden'); $('editView').classList.add('hidden'); $('clientsView').classList.add('hidden'); }
-function showEditor(){ $('listView').classList.add('hidden'); $('clientsView').classList.add('hidden'); $('editView').classList.remove('hidden'); window.scrollTo(0,0); }
+function _hideAll(){ $('listView').classList.add('hidden'); $('editView').classList.add('hidden'); $('clientsView').classList.add('hidden'); $('modelsView').classList.add('hidden'); }
+function showList(){ _hideAll(); $('listView').classList.remove('hidden'); }
+function showEditor(){ _hideAll(); $('editView').classList.remove('hidden'); window.scrollTo(0,0); }
 function closeEditor(){ showList(); }
 
 /* ---------- LIBERAR CLIENTE POR TELEFONE ---------- */
-function showClients(){
-  $('listView').classList.add('hidden'); $('editView').classList.add('hidden');
-  $('clientsView').classList.remove('hidden'); $('cliResult').innerHTML=''; window.scrollTo(0,0);
+function showClients(){ _hideAll(); $('clientsView').classList.remove('hidden'); $('cliResult').innerHTML=''; window.scrollTo(0,0); }
+
+/* ---------- APROVAR MODELO POR TELEFONE ---------- */
+let _foundModel=null;
+function showModels(){ _hideAll(); $('modelsView').classList.remove('hidden'); $('mResult').innerHTML=''; _foundModel=null; window.scrollTo(0,0); }
+async function buscarModelo(){
+  if(!sb){ toast('Configure o Supabase.',true); return; }
+  const phone=_normPhone($('mPhone').value); const box=$('mResult');
+  if(phone.length<9){ box.innerHTML='<span style="color:var(--accent)">Telefone inválido (9 dígitos).</span>'; return; }
+  box.textContent='Buscando…';
+  const { data, error } = await sb.from('creators').select('id,name,phone,account_status,doc_url,owner').not('owner','is',null).limit(1000);
+  if(error){ box.innerHTML='<span style="color:var(--accent)">'+error.message+'</span>'; return; }
+  const hit=(data||[]).find(c=>_normPhone(c.phone)===phone);
+  if(!hit){ _foundModel=null; box.innerHTML='❌ Nenhuma modelo com esse telefone.'; return; }
+  _foundModel=hit;
+  let docLink='(sem documento)';
+  if(hit.doc_url){ try{ const s=await sb.storage.from('model-docs').createSignedUrl(hit.doc_url,300); if(s.data) docLink=`<a class="link" href="${s.data.signedUrl}" target="_blank">📄 ver documento</a>`; }catch(e){} }
+  const st=hit.account_status==='approved'?'✅ já aprovada':(hit.account_status==='rejected'?'❌ recusada':'⏳ aguardando aprovação');
+  box.innerHTML=`<div><b>${esc(hit.name)||'(sem nome)'}</b> · ${phone}<br>Status: ${st}<br>${docLink}</div>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" style="width:auto" onclick="aprovarModelo()" ${hit.account_status==='approved'?'disabled':''}>Aprovar conta</button>
+      <button class="btn btn-danger btn-sm" onclick="recusarModelo()">Recusar</button>
+    </div>`;
+}
+async function aprovarModelo(){
+  if(!_foundModel) return;
+  const { error } = await sb.from('creators').update({account_status:'approved'}).eq('id',_foundModel.id);
+  if(error){ toast(error.message,true); return; }
+  toast('Modelo aprovada! Ela já pode gerenciar a vitrine.'); buscarModelo();
+}
+async function recusarModelo(){
+  if(!_foundModel) return;
+  const { error } = await sb.from('creators').update({account_status:'rejected', approved:false}).eq('id',_foundModel.id);
+  if(error){ toast(error.message,true); return; }
+  toast('Modelo recusada.'); buscarModelo();
 }
 function _normPhone(s){ return String(s||'').replace(/\D/g,'').slice(-9); }
 async function verificarCliente(){
